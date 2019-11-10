@@ -1,0 +1,10 @@
+.modal-content {
+  background-color: transparent;
+}
+
+.modal-background {
+  background-color: rgba(0, 0, 0, 0.501);
+  color: white;
+  border-bottom: 0px;
+  border-top: 0px;
+}
