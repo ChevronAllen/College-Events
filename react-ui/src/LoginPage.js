@@ -7,7 +7,7 @@ class LoginPage extends Component {
     super(props);
 
     this.state = {
-      username: "",
+      email: "",
       password: "",
       loginToggle: "",
       loginModal: false,
@@ -27,17 +27,31 @@ class LoginPage extends Component {
 
   toggleLogin = () => {
     let setToggle = !this.state.loginModal;
-    this.setState({ loginModal: setToggle, registerModal: false, username:"", password:"" });
+    this.setState({ loginModal: setToggle, registerModal: false, email: "", password: "" });
   }
 
   toggleRegister = () => {
     let setToggle = !this.state.registerModal;
-    this.setState({ registerModal: setToggle, loginModal: false, username:"", password:"" });
+    this.setState({ registerModal: setToggle, loginModal: false, email: "", password: "" });
   }
 
-  tryLogin = () => {
-    console.log(this.state.username);
-    console.log(this.state.password);
+  // API post format for react
+  tryLogin(e) {
+    let postBody = { email: this.state.email, password: this.state.password }
+    fetch("/loginAPI", {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(postBody)
+    })
+      .then((response => {
+        response.json().then(data => {
+          console.log("success?");
+        });
+      })
+      ).catch(err => err);
   }
 
   render() {
@@ -52,12 +66,12 @@ class LoginPage extends Component {
             <Form>
               <FormGroup row className={"d-flex justify-content-center"}>
                 <Col sm={10}>
-                  <Input type="text" name="username" id="username" placeholder="Username" onChange={this.handleChange.bind(this)}/>
+                  <Input type="email" name="email" id="email" placeholder="Email" onChange={this.handleChange.bind(this)} />
                 </Col>
               </FormGroup>
               <FormGroup row className={"d-flex justify-content-center"}>
                 <Col sm={10}>
-                  <Input type="password" name="password" id="password" placeholder="Password" onChange={this.handleChange.bind(this)}/>
+                  <Input type="password" name="password" id="password" placeholder="Password" onChange={this.handleChange.bind(this)} />
                 </Col>
               </FormGroup>
             </Form>
@@ -75,18 +89,18 @@ class LoginPage extends Component {
             <Form>
               <FormGroup row className={"d-flex justify-content-center"}>
                 <Col sm={10}>
-                  <Input type="text" name="username" id="username" placeholder="Username" onChange={this.handleChange.bind(this)}/>
+                  <Input type="email" name="email" id="email" placeholder="Email" onChange={this.handleChange.bind(this)} />
                 </Col>
               </FormGroup>
               <FormGroup row className={"d-flex justify-content-center"}>
                 <Col sm={10}>
-                  <Input type="password" name="password" id="password" placeholder="Password" onChange={this.handleChange.bind(this)}/>
+                  <Input type="password" name="password" id="password" placeholder="Password" onChange={this.handleChange.bind(this)} />
                 </Col>
               </FormGroup>
             </Form>
           </ModalBody>
           <ModalFooter className={"modal-background"}>
-          <Button color="primary" onClick={this.toggleLogin} className={"mr-auto"} >Login</Button>
+            <Button color="primary" onClick={this.toggleLogin} className={"mr-auto"} >Login</Button>
             <Button color="primary" onClick={this.tryLogin}>Register</Button>{' '}
             <Button color="secondary" onClick={this.toggleRegister}>Cancel</Button>
           </ModalFooter>
