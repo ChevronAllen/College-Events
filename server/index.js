@@ -1,6 +1,9 @@
 const express = require('express');
 const path = require('path');
 const cluster = require('cluster');
+var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
+var session = require('express-session');
 const numCPUs = require('os').cpus().length;
 
 const isDev = process.env.NODE_ENV !== 'production';
@@ -22,13 +25,22 @@ if (!isDev && cluster.isMaster) {
 } else {
   const app = express();
 
+
+
   // Priority serve any static files.
   app.use(express.static(path.resolve(__dirname, '../react-ui/build')));
+
+  app.use(bodyParser.json());
+  app.use(bodyParser.urlencoded({ extended: true }));
 
   // Answer API requests.
   app.get('/api', function (req, res) {
     res.set('Content-Type', 'application/json');
     res.send('{"message":"Hello from the custom server!"}');
+  });
+
+  app.post('/loginAPI', function (req, res) {
+    res.send(req.body.email);
   });
 
   // All remaining requests return the React app, so it can handle routing.
