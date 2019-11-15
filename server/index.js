@@ -60,37 +60,56 @@ if (!isDev && cluster.isMaster) {
     res.send('{"message":"Hello from the custom server!"}');
   });
 
-  app.post('/registerAPI', function (req, res) {
-    var email = req.body['email'] ;
-    var hashAuth = req.body['auth'];
-    var salt = crytpo.randomBytes(SALT_LENGTH);
+  app.post('/api/register', function (req, res) {
+    var response = {};
+    var email = req.body['email'].toLowerCase().trim() ;
+    var password = req.body['password'];
+    var salt = crytpo.randomBytes(SALT_LENGTH) + "";
 
     var hmac = crytpo.createHmac(HASH_TYPE,salt);
-    hmac.update(hashAuth);
+    hmac.update(password);
+    hmac.digest()
     
 
-    var sql = `CALL euwtker4demcwlxt.proc_user_register( '${email}', '${salt}', '${hmac.digest(HASH_OUT)}' )`;
+    var sql = `CALL euwtker4demcwlxt.proc_user_register('${req.sessionID}', '${email}', '${salt}', '${hmac.digest(HASH_OUT)}' )`;
+    
     //  TODO: Session ids can still avoid MitM attacks. The less times the front end sends authentication data, the better.
-
+    response['sesssionID'] = req.sessionID;
+    response['email'] = email;
+    response['salt'] = salt;
+    
     conn.query(sql, function(err,result){
       //  Process query result
-      if(err){ throw err; }
+      if(err){
+        response['error'] = 1; 
+        return;
+      }
+      response['result'] = result;
 
+ 
+    });
+
+    res.set('Content-Type', 'application/json');
+    res.send(JSON.stringify(response));
+  });
+
+  app.post('/api/login', function (req, res) {
+    var email = req.body['email'].trim().toLowerCase() ;
+    var hashAuth = req.body['auth'];
+    var salt = "";
+
+    //  TODO: Query to fetch salt (also checks if user is valid)
+    var sql = `SELECT c.salt FROM credentials c WHERE c.credentialID = (SELECT u.userCred FROM users u WHERE u.userEmail = '${email}')`;
+    conn.query(sql, function(err,result){
+      //  TODO Process query result
+      if(err){ throw err; }
+      
 
     });
 
-    res.send(req.body.email);
-  });
-
-  app.post('/loginAPI', function (req, res) {
-    var email = req.body['email'] ;
-    var hashAuth = req.body['auth'];
-
-    //  TODO: Query to fetch salt (also checks if user is valid)
-
     //  TODO: Query to Login (sort out what data the front end needs to be sent on a success)
 
-    var sql = "";
+    var sql = "SELECT x";
 
     conn.query(sql, function(err,result){
       //  Process query result
