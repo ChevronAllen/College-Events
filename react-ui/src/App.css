@@ -1,26 +1,41 @@
+/* Color scheme https://coolors.co/002b3f-a9c3da-0d5877-04050a-457ca5*/
+
 .App {
   text-align: center;
-}
-
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 40vmin;
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  flex-flow: row;
+  background-color: #A9C3DA;
 }
 
-.App-link {
-  color: #61dafb;
+.navBar {
+  background-color: #002B3F;
+  color: #BE8900;
 }
+
+.centerBody {
+  float: left;
+  flex: 2;
+ }
+
+.leftBannerDiv {
+  float: left;
+ }
+
+#leftBanner {
+ height: 100vh;
+ width: 15vw;
+ min-width: 150px;
+}
+
+.rightBannerDiv {
+  float: right;
+ }
+
+#rightBanner {
+  height: 100vh;
+ width: 15vw;
+ min-width: 150px;
+ }
 
 @keyframes App-logo-spin {
   from {
