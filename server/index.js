@@ -7,15 +7,27 @@ var session = require('express-session');
 const numCPUs = require('os').cpus().length;
 
 const crytpo = require('crypto');
+const mysql = require('mysql');
+
 const SALT_LENGTH = 16;
+const SALT_RANGE = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 const HASH_TYPE = 'sha256';
 const HASH_OUT = 'hex';
-const mysql = require('mysql');
 
 const isDev = process.env.NODE_ENV !== 'production';
 const PORT = process.env.PORT || 5000;
 
 
+
+function generateSalt(){
+  var salt = "";
+  for( i = 0; i < SALT_LENGTH; i++){
+    var rand = Math.floor(Math.random() * SALT_RANGE.length);
+    
+    salt = salt + SALT_RANGE[rand];
+  }
+  return salt;
+}
 
 // Multi-process to utilize all CPU cores.
 if (!isDev && cluster.isMaster) {
@@ -62,17 +74,15 @@ if (!isDev && cluster.isMaster) {
 
   app.post('/api/register', function (req, res) {
     var response = {};
-    var email = req.body['email'].toLowerCase().trim() ;
+    var email = req.body['email'];
     var password = req.body['password'];
-    var salt = crytpo.randomBytes(SALT_LENGTH) + "";
+    var salt = generateSalt(); //crytpo.randomBytes(SALT_LENGTH) + "";
 
-    var hmac = crytpo.createHmac(HASH_TYPE,salt);
-    hmac.update(password);
-    hmac.digest()
+    var hmac = crytpo.createHmac(HASH_TYPE, salt + password);
     
 
     var sql = `CALL euwtker4demcwlxt.proc_user_register('${req.sessionID}', '${email}', '${salt}', '${hmac.digest(HASH_OUT)}' )`;
-    
+    console.log(sql);
     //  TODO: Session ids can still avoid MitM attacks. The less times the front end sends authentication data, the better.
     response['sesssionID'] = req.sessionID;
     response['email'] = email;
@@ -94,31 +104,43 @@ if (!isDev && cluster.isMaster) {
   });
 
   app.post('/api/login', function (req, res) {
-    var email = req.body['email'].trim().toLowerCase() ;
-    var hashAuth = req.body['auth'];
+    var message = {};
+    
+    var email = req.body['email'];
+    var password = req.body['auth'];
     var salt = "";
 
     //  TODO: Query to fetch salt (also checks if user is valid)
-    var sql = `SELECT c.salt FROM credentials c WHERE c.credentialID = (SELECT u.userCred FROM users u WHERE u.userEmail = '${email}')`;
+    var sql = `SELECT euwtker4demcwlxt.fn_find_salt('${email}') AS salt`;
     conn.query(sql, function(err,result){
       //  TODO Process query result
-      if(err){ throw err; }
-      
+      if(err){ 
+        
+      }
+      salt = result[0]['salt'];
 
+      console.log(salt);
+      //password = crytpo.createHmac(HASH_TYPE, result[0]['salt']).update(hashAuth);
     });
 
     //  TODO: Query to Login (sort out what data the front end needs to be sent on a success)
 
-    var sql = "SELECT x";
+    var auth = crytpo.createHmac(HASH_TYPE, salt + password);
+    //auth = auth.update(hashAuth);
 
+    var sql = `CALL euwtker4demcwlxt.proc_user_login( '${email}', '${auth.digest(HASH_OUT)}','${req.sessionID}' ); `;
+    console.log(sql);
     conn.query(sql, function(err,result){
       //  Process query result
-      if(err){ throw err; }
-
-
+      if(err){ 
+        
+      }
+      console.log(JSON.stringify(result));
+      message['userID'] = result[0]['userID'];
     });
 
-    res.send(req.body.email);
+    res.send(JSON.stringify(message));
+
   });
 
   // All remaining requests return the React app, so it can handle routing.
