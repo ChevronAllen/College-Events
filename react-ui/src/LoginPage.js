@@ -44,7 +44,7 @@ class LoginPage extends Component {
     
     postBody['email']   = this.state.email; 
     postBody['password']= md5(this.state.password) ;
-    
+    console.log(JSON.stringify(postBody));
     
     fetch("/api/login", {
       method: 'POST',
@@ -54,13 +54,10 @@ class LoginPage extends Component {
       },
       body: JSON.stringify(postBody)
     })
-    .then((response => {
-        response.json().then(data => {
-          console.log("success?");
-        });
-      })
-    ).catch(err => err);
-
+    .then((response)=>{
+      console.log('success');
+    }).catch(err => err);
+    
   }
 
   tryRegister(e){    
@@ -68,6 +65,7 @@ class LoginPage extends Component {
     
     postBody['email']   = this.state.email; 
     postBody['password']= md5(this.state.password) ;
+    console.log(JSON.stringify(postBody));
     
     
     fetch("/api/register", {
@@ -78,14 +76,10 @@ class LoginPage extends Component {
       },
       body: JSON.stringify(postBody)
     })
-    .then((response => {
-        response.json().then(data => {
-          console.log("success?");
-        });
-      })
-    ).catch(err => err);
+    .then(  (response)=>{
+        console.log('success');
+    }).catch(err => err);
       
-     console.log(JSON.stringify(postBody));
   }
 
   render() {

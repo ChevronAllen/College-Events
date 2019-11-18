@@ -73,73 +73,99 @@ if (!isDev && cluster.isMaster) {
   });
 
   app.post('/api/register', function (req, res) {
-    var response = {};
+    var message = {};
     var email = req.body['email'];
     var password = req.body['password'];
-    var salt = generateSalt(); //crytpo.randomBytes(SALT_LENGTH) + "";
+    var salt = generateSalt()+"";
 
-    var hmac = crytpo.createHmac(HASH_TYPE, salt + password);
+    var auth = crytpo.createHmac(HASH_TYPE, salt );
+    auth = auth.update(password);
     
+    let debug = {};
+    debug['sessionID'] = req.sessionID;
+    debug['email'] = email;
+    debug['salt'] = salt;
+    debug['hash'] = auth.digest(HASH_OUT);
+    console.log(debug);
 
-    var sql = `CALL euwtker4demcwlxt.proc_user_register('${req.sessionID}', '${email}', '${salt}', '${hmac.digest(HASH_OUT)}' )`;
-    console.log(sql);
+    var sql = `CALL euwtker4demcwlxt.proc_user_register('${req.sessionID}', '${email}', '${salt}', '${auth.digest(HASH_OUT)}' )`;
+    //console.log(sql);
     //  TODO: Session ids can still avoid MitM attacks. The less times the front end sends authentication data, the better.
-    response['sesssionID'] = req.sessionID;
-    response['email'] = email;
-    response['salt'] = salt;
+    message['sesssionID'] = req.sessionID;
+    message['email'] = email;
+
     
     conn.query(sql, function(err,result){
       //  Process query result
       if(err){
-        response['error'] = 1; 
-        return;
+        message['error'] = 1; 
+        message['error_descr'] = `An error occured, please try again later`;
+      }else{
+        message['userID'] = result[0][0]['userID'];
+        if(message['userID'] == null){
+          message['error'] = 1; 
+          message['error_descr'] = `An account with this email already exists`;
+        }
       }
-      response['result'] = result;
 
- 
+      
+      res.set('Content-Type', 'application/json');
+      res.send(JSON.stringify(message));
     });
 
-    res.set('Content-Type', 'application/json');
-    res.send(JSON.stringify(response));
   });
 
   app.post('/api/login', function (req, res) {
-    var message = {};
+    let message = {};
     
-    var email = req.body['email'];
-    var password = req.body['auth'];
-    var salt = "";
+    let email = req.body['email'];
+    let password = req.body['password'];
+    let salt = "";
 
     //  TODO: Query to fetch salt (also checks if user is valid)
-    var sql = `SELECT euwtker4demcwlxt.fn_find_salt('${email}') AS salt`;
+    let sql = `SELECT euwtker4demcwlxt.fn_find_salt('${email}') AS salt`;
     conn.query(sql, function(err,result){
       //  TODO Process query result
       if(err){ 
-        
+        message['error'] = 1; 
+        message['error_descr'] = `Incorrect Username or Password`;
+      }else{
+        salt = result[0]['salt']+"";
+        console.log(result);
+        console.log(salt);
       }
-      salt = result[0]['salt'];
 
-      console.log(salt);
-      //password = crytpo.createHmac(HASH_TYPE, result[0]['salt']).update(hashAuth);
+      //  TODO: Query to Login (sort out what data the front end needs to be sent on a success)
+
+      let auth = crytpo.createHmac(HASH_TYPE, salt );
+      auth = auth.update(password);
+
+      let debug = {};
+      debug['sessionID'] = req.sessionID;
+      debug['email'] = email;
+      debug['salt'] = salt;
+      debug['hash'] = auth.digest(HASH_OUT);
+      console.log(debug);
+
+      sql = `CALL euwtker4demcwlxt.proc_user_login( '${email}', '${debug['hash']}','${req.sessionID}' ); `;
+      console.log(sql);
+
+      conn.query(sql, function(err,result){
+        //  Process query result
+        if(err){ 
+          message['error'] = 1; 
+          message['error_descr'] = `Incorrect Username or Password`;
+        }else{
+          message['userID'] = result[0][0]['userID'];
+          
+          console.log(message);
+        }
+        res.set('Content-Type', 'application/json');
+        res.send(JSON.stringify(message));
+      });
     });
 
-    //  TODO: Query to Login (sort out what data the front end needs to be sent on a success)
-
-    var auth = crytpo.createHmac(HASH_TYPE, salt + password);
-    //auth = auth.update(hashAuth);
-
-    var sql = `CALL euwtker4demcwlxt.proc_user_login( '${email}', '${auth.digest(HASH_OUT)}','${req.sessionID}' ); `;
-    console.log(sql);
-    conn.query(sql, function(err,result){
-      //  Process query result
-      if(err){ 
-        
-      }
-      console.log(JSON.stringify(result));
-      message['userID'] = result[0]['userID'];
-    });
-
-    res.send(JSON.stringify(message));
+    
 
   });
 
