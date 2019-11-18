@@ -11,11 +11,15 @@ const mysql = require('mysql');
 
 const SALT_LENGTH = 16;
 const SALT_RANGE = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-const HASH_TYPE = 'sha256';
-const HASH_OUT = 'hex';
+const HASH_ALGO = 'sha256';
+const HASH_OUT_FORMAT = 'hex';
 
 const isDev = process.env.NODE_ENV !== 'production';
 const PORT = process.env.PORT || 5000;
+
+const ERROR_CONN = "Connection Error";
+const ERROR_LOGIN = "Incorrect Username/Password combination";
+const ERROR_REG_EXISTS = "An account already exists with that email";
 
 
 
@@ -72,42 +76,48 @@ if (!isDev && cluster.isMaster) {
     res.send('{"message":"Hello from the custom server!"}');
   });
 
+  //  Register a new User Account
   app.post('/api/register', function (req, res) {
-    var message = {};
-    var email = req.body['email'];
-    var password = req.body['password'];
-    var salt = generateSalt()+"";
-
-    var auth = crytpo.createHmac(HASH_TYPE, salt );
-    auth = auth.update(password);
     
+    var message = {}; //  Response object
+
+    var email = req.body['email'];
+    var password = req.body['password']; // pre hashed (md5) password
+    
+    //  Salt and Hash  password
+    var salt = generateSalt()+"";
+    var auth = crytpo.createHmac(HASH_ALGO, salt );
+    auth = auth.update(password).digest(HASH_OUT_FORMAT);    
+    
+
+    // Server debug data
     let debug = {};
     debug['sessionID'] = req.sessionID;
     debug['email'] = email;
     debug['salt'] = salt;
-    debug['hash'] = auth.digest(HASH_OUT);
+    debug['hash'] = auth;
     console.log(debug);
 
-    var sql = `CALL euwtker4demcwlxt.proc_user_register('${req.sessionID}', '${email}', '${salt}', '${auth.digest(HASH_OUT)}' )`;
-    //console.log(sql);
-    //  TODO: Session ids can still avoid MitM attacks. The less times the front end sends authentication data, the better.
+    let sql = `CALL euwtker4demcwlxt.proc_user_register('${req.sessionID}', '${email}', '${salt}', '${auth}' )`;
+      
     message['sesssionID'] = req.sessionID;
-    message['email'] = email;
 
-    
     conn.query(sql, function(err,result){
       //  Process query result
       if(err){
         message['error'] = 1; 
-        message['error_descr'] = `An error occured, please try again later`;
+        message['error_descr'] = ERROR_CONN;
+        message['userID'] = null;
       }else{
+
         message['userID'] = result[0][0]['userID'];
+
         if(message['userID'] == null){
           message['error'] = 1; 
-          message['error_descr'] = `An account with this email already exists`;
+          message['error_descr'] = ERROR_REG_EXISTS;
         }
-      }
 
+      }
       
       res.set('Content-Type', 'application/json');
       res.send(JSON.stringify(message));
@@ -115,57 +125,65 @@ if (!isDev && cluster.isMaster) {
 
   });
 
+  //  Login to an existing user account
   app.post('/api/login', function (req, res) {
     let message = {};
     
     let email = req.body['email'];
     let password = req.body['password'];
-    let salt = "";
+    let salt = null;
 
-    //  TODO: Query to fetch salt (also checks if user is valid)
+    //  Request Salt from Server
     let sql = `SELECT euwtker4demcwlxt.fn_find_salt('${email}') AS salt`;
     conn.query(sql, function(err,result){
-      //  TODO Process query result
+    
       if(err){ 
         message['error'] = 1; 
-        message['error_descr'] = `Incorrect Username or Password`;
+        message['error_descr'] = ERROR_CONN;
       }else{
         salt = result[0]['salt']+"";
-        console.log(result);
-        console.log(salt);
       }
 
-      //  TODO: Query to Login (sort out what data the front end needs to be sent on a success)
-
-      let auth = crytpo.createHmac(HASH_TYPE, salt );
-      auth = auth.update(password);
-
-      let debug = {};
-      debug['sessionID'] = req.sessionID;
-      debug['email'] = email;
-      debug['salt'] = salt;
-      debug['hash'] = auth.digest(HASH_OUT);
-      console.log(debug);
-
-      sql = `CALL euwtker4demcwlxt.proc_user_login( '${email}', '${debug['hash']}','${req.sessionID}' ); `;
-      console.log(sql);
-
-      conn.query(sql, function(err,result){
-        //  Process query result
-        if(err){ 
-          message['error'] = 1; 
-          message['error_descr'] = `Incorrect Username or Password`;
-        }else{
-          message['userID'] = result[0][0]['userID'];
-          
-          console.log(message);
-        }
-        res.set('Content-Type', 'application/json');
-        res.send(JSON.stringify(message));
-      });
-    });
-
-    
+      //  Stop here if no salt is returned
+      if(salt != null){
+        
+        let auth = crytpo.createHmac(HASH_ALGO, salt );
+        auth = auth.update(password).digest(HASH_OUT_FORMAT);
+        
+        let debug = {};
+        debug['sessionID'] = req.sessionID;
+        debug['email'] = email;
+        debug['salt'] = salt;
+        debug['hash'] = auth;
+        console.log(debug);
+        
+        sql = `CALL euwtker4demcwlxt.proc_user_login('${req.sessionID}', '${email}', '${auth}' ); `;
+        
+        conn.query(sql, function(err,result){
+          //  Process query result
+          if(err){ 
+            message['error'] = 1; 
+            message['error_descr'] = ERROR_CONN;
+            message['userID'] = null;
+          }else{
+            
+            message['userID'] = result[0][0]['userID'];
+            if(message['userID'] == null){
+              message['userID'] = null;
+              message['error'] = 1;
+              message['error_descr'] = ERROR_LOGIN;
+            }            
+          }            
+            res.set('Content-Type', 'application/json');
+            res.send(JSON.stringify(message));
+        });
+        
+      }else{
+        message['error'] = 1;
+        message['error_descr'] = ERROR_LOGIN;
+      }
+      
+    });    
 
   });
 
