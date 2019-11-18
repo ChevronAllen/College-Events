@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { Col, Button, Modal, ModalHeader, ModalBody, ModalFooter, Form, FormGroup, Input } from 'reactstrap';
 import './Modal.css';
 
+const md5 = require('md5');
+
 class LoginPage extends Component {
   constructor(props) {
     super(props);
@@ -17,6 +19,7 @@ class LoginPage extends Component {
     this.toggleLogin = this.toggleLogin.bind(this);
     this.toggleRegister = this.toggleRegister.bind(this);
     this.tryLogin = this.tryLogin.bind(this);
+    this.tryRegister = this.tryRegister.bind(this);
   }
 
   handleChange = event => {
@@ -36,9 +39,14 @@ class LoginPage extends Component {
   }
 
   // API post format for react
-  tryLogin(e) {
-    let postBody = { email: this.state.email, password: this.state.password }
-    fetch("/loginAPI", {
+  tryLogin(e) {    
+    let postBody = {};   
+    
+    postBody['email']   = this.state.email; 
+    postBody['password']= md5(this.state.password) ;
+    console.log(JSON.stringify(postBody));
+    
+    fetch("/api/login", {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -46,12 +54,32 @@ class LoginPage extends Component {
       },
       body: JSON.stringify(postBody)
     })
-      .then((response => {
-        response.json().then(data => {
-          console.log("success?");
-        });
-      })
-      ).catch(err => err);
+    .then((response)=>{
+      console.log('success');
+    }).catch(err => err);
+    
+  }
+
+  tryRegister(e){    
+    let postBody = {};   
+    
+    postBody['email']   = this.state.email; 
+    postBody['password']= md5(this.state.password) ;
+    console.log(JSON.stringify(postBody));
+    
+    
+    fetch("/api/register", {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(postBody)
+    })
+    .then(  (response)=>{
+        console.log('success');
+    }).catch(err => err);
+      
   }
 
   render() {
@@ -101,7 +129,7 @@ class LoginPage extends Component {
           </ModalBody>
           <ModalFooter className={"modal-background"}>
             <Button color="primary" onClick={this.toggleLogin} className={"mr-auto"} >Login</Button>
-            <Button color="primary" onClick={this.tryLogin}>Register</Button>{' '}
+            <Button color="primary" onClick={this.tryRegister}>Register</Button>{' '}
             <Button color="secondary" onClick={this.toggleRegister}>Cancel</Button>
           </ModalFooter>
         </Modal>
