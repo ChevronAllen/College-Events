@@ -5,8 +5,8 @@ import './App.css';
 import LoginPage from './LoginPage';
 import LandingPage from './LandingPage';
 import AdminPage from './AdminPage';
-import leftBanner from "./Images/LeftBanner.jpg"
-import rightBanner from "./Images/RightBanner.jpg"
+import leftBanner from "./Images/LeftBanner.gif"
+import rightBanner from "./Images/RightBanner.gif"
 
 class App extends Component {
   render() {

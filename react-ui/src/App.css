@@ -15,6 +15,7 @@
 .centerBody {
   float: left;
   flex: 2;
+  display:block;
  }
 
 .leftBannerDiv {
