@@ -5,14 +5,19 @@ import './App.css';
 import LoginPage from './LoginPage';
 import LandingPage from './LandingPage';
 import AdminPage from './AdminPage';
+import leftBanner from "./Images/LeftBanner.gif"
+import rightBanner from "./Images/RightBanner.gif"
 
 class App extends Component {
   render() {
   return (
     <div className="App">
+      <div className="leftBannerDiv">
+          <img id="leftBanner" src={leftBanner} alt="Left Banner"/>
+      </div>
       <Router>
-        <div>
-          <Navbar color="light" light expand="md">
+        <div className="centerBody">
+          <Navbar className="navBar" dark expand="md">
         <NavbarBrand href="/">Login</NavbarBrand>
           <Nav className="ml-auto" navbar>
             <NavItem>
@@ -33,7 +38,12 @@ class App extends Component {
           </Switch>
         </div>
       </Router>
+      <div className="rightBannerDiv">
+        <img id="rightBanner" src={rightBanner} alt="Right Banner"/>
+      </div>
     </div>
+
+  
   );
   }
 }
