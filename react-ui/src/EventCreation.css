@@ -1,0 +1,53 @@
+.container {
+  padding: 60px;
+  text-align: left;
+  font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+  color: #2A1E00;
+}
+
+h1 {
+  font-family: Lucida Sans Unicode;
+  font-size: 30px;
+  font-style: normal;
+  font-variant: small-caps;
+  font-weight: 100;
+  line-height: 45px;
+  letter-spacing: 5px;
+}
+
+h3 {
+  font-family: Lucida Sans Unicode;
+  font-size: 14px;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: 100;
+  line-height: 20px;
+  letter-spacing: 3px;
+}
+
+p {
+  font-family: Lucida Sans Unicode;
+  font-size: 14px;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+blockquote {
+  font-family: Lucida Sans Unicode;
+  font-size: 21px;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: 400;
+  line-height: 30px;
+}
+
+pre {
+  font-family: Lucida Sans Unicode;
+  font-size: 13px;
+  font-style: normal;
+  font-variant: normal;
+  font-weight: 400;
+  line-height: 18.5667px;
+}
