@@ -101,6 +101,7 @@ if (!isDev && cluster.isMaster) {
     let message = { error: 0};
     let rsoName = req.body['nameRSO'];
     let rsoDesc = req.body['descriptionRSO'];
+
     let userID = req.session['userID'];
     let sessionID = req.session['sessionID'];
     
@@ -113,6 +114,7 @@ if (!isDev && cluster.isMaster) {
         message['error_description'] = ERROR_CONN;
         res.set('Content-Type', 'application/json');
         res.send(JSON.stringify(message));
+
       }else if(result[0]['valid'] = '1') {
         console.log('valid user');
 
@@ -125,17 +127,20 @@ if (!isDev && cluster.isMaster) {
           }else{
             message['rsoID'] = result[0][0]['rsoID'];
           }
+
           res.set('Content-Type', 'application/json');
           res.send(JSON.stringify(message));
 
         });
-        return;
+
       }else{
         console.log('invalid user');
+        
+        res.set('Content-Type', 'application/json');
+        res.send(JSON.stringify(message));
       }
 
-      res.set('Content-Type', 'application/json');
-      res.send(JSON.stringify(message));      
+            
       
 
     });
