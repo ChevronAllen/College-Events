@@ -54,9 +54,12 @@ class LoginPage extends Component {
       },
       body: JSON.stringify(postBody)
     })
-    .then((response)=>{
-      console.log('success');
-    }).catch(err => err);
+    .then((response => {
+      response.json().then(data =>{
+        console.log('success');
+        localStorage.setItem('userID', "500");
+      })
+    })).catch(err => err);
     
   }
 
@@ -76,9 +79,13 @@ class LoginPage extends Component {
       },
       body: JSON.stringify(postBody)
     })
-    .then(  (response)=>{
+    .then((response => {
+      response.json().then(data =>{
         console.log('success');
-    }).catch(err => err);
+        localStorage.setItem('userID', "500");
+      })
+    })
+    ).catch(err => err);
       
   }
 
