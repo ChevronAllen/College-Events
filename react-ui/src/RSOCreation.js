@@ -29,21 +29,23 @@ class RSOCreation extends Component {
     postBody['nameRSO']= this.state.nameRSO;
     postBody['descriptionRSO']= this.state.descriptionRSO;
     postBody['userID']= this.state.userID;
-    console.log(JSON.stringify(postBody));
     
-    /*
-    fetch("/api/", {
+    console.log(JSON.stringify(postBody)); 
+    
+    
+    fetch('/api/rso/create', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(postBody)
+      body: JSON.stringify(postBody) 
     })
     .then(  (response)=>{
         console.log('success');
+        console.log(response);
     }).catch(err => err);
-    */
+    
   }
 
   componentDidMount(){
