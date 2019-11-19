@@ -3,7 +3,7 @@ import './RSOCreation.css';
 import MapContainer from './MapContainer.js';
 import { Button, Form, FormGroup, Label, Input, FormText } from 'reactstrap';
 
-class LandingPage extends Component {
+class RSOCreation extends Component {
   
   constructor(props) {
     super(props);
@@ -71,4 +71,4 @@ class LandingPage extends Component {
 }
 }
 
-export default LandingPage;
+export default RSOCreation;
