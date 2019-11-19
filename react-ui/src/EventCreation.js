@@ -80,21 +80,19 @@ class EventCreation extends Component {
 
     console.log(JSON.stringify(postBody));
     
-    /*
-    fetch("/api/", {
+    
+    fetch("/api/events/create", {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(postBody)
-    })
-    .then((response => {
-      response.json().then(data =>{
-        console.log(data['results'][0]['geometry']['location']['lat']);
-      })
-    })).catch(err => err);
-    */
+    }).then(  (response)=>{
+      console.log('success');
+      console.log(response);
+    }).catch(err => err);
+    
   }
 
   render() {
