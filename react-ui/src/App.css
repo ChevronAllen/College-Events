@@ -20,6 +20,7 @@
 
 .leftBannerDiv {
   float: left;
+  background-color: #002B3F;
  }
 
 #leftBanner {
@@ -30,6 +31,7 @@
 
 .rightBannerDiv {
   float: right;
+  background-color: #002B3F;
  }
 
 #rightBanner {
@@ -37,7 +39,7 @@
  width: 15vw;
  min-width: 150px;
  }
-
+ 
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
