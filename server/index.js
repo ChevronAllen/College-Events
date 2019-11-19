@@ -23,6 +23,7 @@ const ERROR_REG_EXISTS = "An account already exists with that email";
 
 
 
+
 function generateSalt(){
   var salt = "";
   for( i = 0; i < SALT_LENGTH; i++){
@@ -32,6 +33,7 @@ function generateSalt(){
   }
   return salt;
 }
+
 
 // Multi-process to utilize all CPU cores.
 if (!isDev && cluster.isMaster) {
@@ -48,6 +50,9 @@ if (!isDev && cluster.isMaster) {
 
 } else {
   const app = express();
+
+  app.use(cookieParser());
+  app.use(session());
   
   //  Create Connection Object
   var conn = mysql.createConnection({
@@ -96,6 +101,7 @@ if (!isDev && cluster.isMaster) {
     debug['email'] = email;
     debug['salt'] = salt;
     debug['hash'] = auth;
+    debug['response'] = message;
     console.log(debug);
 
     let sql = `CALL euwtker4demcwlxt.proc_user_register('${req.sessionID}', '${email}', '${salt}', '${auth}' )`;
@@ -116,7 +122,7 @@ if (!isDev && cluster.isMaster) {
           message['error'] = 1; 
           message['error_descr'] = ERROR_REG_EXISTS;
         }
-
+        
       }
       
       res.set('Content-Type', 'application/json');
@@ -140,11 +146,12 @@ if (!isDev && cluster.isMaster) {
       if(err){ 
         message['error'] = 1; 
         message['error_descr'] = ERROR_CONN;
+        salt = null;
       }else{
         salt = result[0]['salt']+"";
       }
 
-      //  Stop here if no salt is returned
+      // Stop here if no salt is returned
       if(salt != null){
         
         let auth = crytpo.createHmac(HASH_ALGO, salt );
@@ -155,32 +162,41 @@ if (!isDev && cluster.isMaster) {
         debug['email'] = email;
         debug['salt'] = salt;
         debug['hash'] = auth;
+        debug['response'] = message;
         console.log(debug);
         
-        sql = `CALL euwtker4demcwlxt.proc_user_login('${req.sessionID}', '${email}', '${auth}' ); `;
-        
+        //  Login 
+        sql = `CALL euwtker4demcwlxt.proc_user_login( '${email}', '${auth}' );`;        
         conn.query(sql, function(err,result){
-          //  Process query result
+          
           if(err){ 
             message['error'] = 1; 
             message['error_descr'] = ERROR_CONN;
             message['userID'] = null;
           }else{
             
-            message['userID'] = result[0][0]['userID'];
+            
             if(message['userID'] == null){
               message['userID'] = null;
               message['error'] = 1;
               message['error_descr'] = ERROR_LOGIN;
-            }            
-          }            
-            res.set('Content-Type', 'application/json');
-            res.send(JSON.stringify(message));
+            }else{
+              message['userID'] = result[0][0]['userID'];
+              req.session.sessionID = result[0][0]['sessionID'];
+              req.session.userID    = result[0][0]['userID'];
+            } 
+
+          }    
+
+          res.set('Content-Type', 'application/json');
+          res.send(JSON.stringify(message));
         });
         
       }else{
         message['error'] = 1;
         message['error_descr'] = ERROR_LOGIN;
+        res.set('Content-Type', 'application/json');
+        res.send(JSON.stringify(message));
       }
       
     });    
