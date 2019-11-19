@@ -176,12 +176,12 @@ if (!isDev && cluster.isMaster) {
         res.set('Content-Type', 'application/json');
         res.send(JSON.stringify(message));        
 
-      }else if(result[0]['valid'] == 0) {
+      }else if(result[0]['valid'] == '0') {
         console.log('invalid user');
         res.set('Content-Type', 'application/json');
         res.send(JSON.stringify(message));
 
-      }else if(result[0]['valid'] == 1){
+      }else if(result[0]['valid'] == '1'){
         console.log('valid user');
         sql = `CALL proc_event_create('${isPublic}','${name}','${description}','${startDate}', '${endDate}', '${JSON.stringify(repeats)}','${JSON.stringify(location)}', '${userID}', '${rsoID}', '${schoolID}')`;
 
