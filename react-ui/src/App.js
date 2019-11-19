@@ -5,15 +5,17 @@ import './App.css';
 import LoginPage from './LoginPage';
 import LandingPage from './LandingPage';
 import AdminPage from './AdminPage';
-import leftBanner from "./Images/LeftBanner.gif"
-import rightBanner from "./Images/RightBanner.gif"
+import RSOCreation from './RSOCreation';
+import EventCreation from './EventCreation';
+import leftBanner from "./Images/LeftBanner.jpg"
+import rightBanner from "./Images/RightBanner.jpg"
 
 class App extends Component {
   render() {
   return (
     <div className="App">
       <div className="leftBannerDiv">
-          <img id="leftBanner" src={leftBanner} alt="Left Banner"/>
+          <img id="leftBanner" src={leftBanner} alt=""/>
       </div>
       <Router>
         <div className="centerBody">
@@ -29,17 +31,25 @@ class App extends Component {
             <NavItem>
               <NavLink href="/AdminPage">AdminPage</NavLink>
             </NavItem>
+            <NavItem>
+              <NavLink href="/RSOCreation">Create RSO</NavLink>
+            </NavItem>
+            <NavItem>
+              <NavLink href="/EventCreation">Create Event</NavLink>
+            </NavItem>
           </Nav>
         </Navbar>
           <Switch>
               <Route exact path='/' component={LoginPage} />
               <Route path='/LandingPage' component={LandingPage} />
               <Route path='/AdminPage' component={AdminPage} />
+              <Route path='/RSOCreation' component={RSOCreation} />
+              <Route path='/EventCreation' component={EventCreation} />
           </Switch>
         </div>
       </Router>
       <div className="rightBannerDiv">
-        <img id="rightBanner" src={rightBanner} alt="Right Banner"/>
+        <img id="rightBanner" src={rightBanner} alt=""/>
       </div>
     </div>
 
