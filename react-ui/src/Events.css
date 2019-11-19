@@ -5,6 +5,10 @@
   color: #2A1E00;
 }
 
+.cardCol {
+  padding-top: 30px;
+}
+
 h1 {
   font-family: Lucida Sans Unicode;
   font-size: 30px;
