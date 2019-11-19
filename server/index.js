@@ -142,28 +142,62 @@ if (!isDev && cluster.isMaster) {
 
   });
 
-  app.get('/api/events', function (req, res){
-    let message = {};
-    /*
-    let sql = "";
-    let userID = req.body['userID'];
-    let sessionID = req.body['sessionID'];
 
-    if( userID == null && sessionID == null){     
-      sql = `SELECT * FROM view_events_public`;
-    }else {
-      sql = `CALL proc_events_available( '${userID}' , '${sessionID}' );`;
-    }
+  
+  app.post('/api/events/create', function (req, res){
+    let message = {error: 0};
 
-    conn.query(sql, function(result){
-      message = result;
-      res.set('Content-Type', 'application/json');
-      res.send(message);
-    });
-    */
+    let isPublic = req.body['private'] | true;
+    let name = req.body['nameEvent'] ;
+    let description = req.body['descriptionEvent'] ;
+    let startDate = '2019-11-10' ; //req.body['startDate'] | 
+    let endDate =  '2019-12-25' ;//req.body['endDate'] 
+    let repeats = {}; // req.body['repeat'] | 
+    let location = {};// req.body['location'] | 
+    let rsoID =  'eb843f8c-0aea-11ea-a27d-0649c169819a';//req.body['rsoID']
+    let schoolID = 'f7858ec0-0a6d-11ea-a27d-0649c169819a' ;//req.body['schoolID']
+    
+    let userID = req.session['userID'];
+    let sessionID = req.session['sessionID'];
 
-   res.set('Content-Type', 'application/json');
-   res.send(message);
+
+
+    let sql = `SELECT fn_session_valid('${userID}', '${sessionID}') AS 'valid';`;
+
+    conn.query(sql,function(err,result){      
+      if(err){
+        message['error'] = 1;
+        message['error_description'] = ERROR_CONN;
+        res.set('Content-Type', 'application/json');
+        res.send(JSON.stringify(message));        
+
+      }else if(result[0]['valid'] == 0) {
+        console.log('invalid user');
+        res.set('Content-Type', 'application/json');
+        res.send(JSON.stringify(message));
+
+      }else if(result[0]['valid'] == 1){
+        console.log('valid user');
+        sql = `CALL proc_event_create('${isPublic}','${name}','${description}','${startDate}', '${endDate}', '${JSON.stringify(repeats)}','${JSON.stringify(location)}', '${userID}', '${rsoID}', '${schoolID}')`;
+
+        conn.query(sql, function(err,result){
+
+          if(err){
+            message['error'] = 1; 
+            message['error_descr'] = ERROR_CONN;
+            message['debug'] = err;
+            console.log(err);
+          }else{
+                      
+            
+          }    
+          
+          res.set('Content-Type', 'application/json');
+          res.send(JSON.stringify(message));  
+        });       
+      }        
+    });   
+    
   });
 
   //  Register a new User Account
