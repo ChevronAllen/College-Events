@@ -118,14 +118,14 @@ if (!isDev && cluster.isMaster) {
       }else if(result[0]['valid'] = '1') {
         console.log('valid user');
 
-        sql = `CALL euwtker4demcwlxt.proc_rso_create( '${rsoName}','${rsoDesc}', '${userID}','f7858ec0-0a6d-11ea-a27d-0649c169819a')`;
+        sql = `CALL euwtker4demcwlxt.proc_rso_create( '${rsoName}', '${rsoDesc}', '${userID}', 'f7858ec0-0a6d-11ea-a27d-0649c169819a' );`;
 
         conn.query(sql, function(err, result){
           if(err){
             message['error'] = 1;
             message['error_description'] = ERROR_CONN;
           }else{
-            message['rsoID'] = result; //result[0][0]['rsoID'];
+            message['rsoID'] = result[0][0]['rsoID'];
           }
 
           res.set('Content-Type', 'application/json');
