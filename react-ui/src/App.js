@@ -22,13 +22,10 @@ class App extends Component {
       <Router>
         <div className="centerBody">
           <Navbar className="navBar" dark expand="md">
-        <NavbarBrand href="/">Login</NavbarBrand>
+        <NavbarBrand href="/">Home</NavbarBrand>
           <Nav className="ml-auto" navbar>
             <NavItem>
-              <NavLink href="/">Login</NavLink>
-            </NavItem>
-            <NavItem>
-              <NavLink href="/LandingPage">LandingPage</NavLink>
+              <NavLink href="/LoginPage">Login</NavLink>
             </NavItem>
             <NavItem>
               <NavLink href="/AdminPage">AdminPage</NavLink>
@@ -45,8 +42,8 @@ class App extends Component {
           </Nav>
         </Navbar>
           <Switch>
-              <Route exact path='/' component={LoginPage} />
-              <Route path='/LandingPage' component={LandingPage} />
+              <Route exact path='/' component={LandingPage} />
+              <Route path='/LoginPage' component={LoginPage} />
               <Route path='/AdminPage' component={AdminPage} />
               <Route path='/RSOCreation' component={RSOCreation} />
               <Route path='/EventCreation' component={EventCreation} />
