@@ -52,7 +52,7 @@ if (!isDev && cluster.isMaster) {
   const app = express();
 
   app.use(cookieParser());
-  app.use(session());
+  app.use(session({secret:"like this?"}));
   
   //  Create Connection Object
   var conn = mysql.createConnection({
@@ -60,7 +60,7 @@ if (!isDev && cluster.isMaster) {
     user: "odexbq57g80uqove",
     password: "zafxdf0tnbo7vebq",
     database: "euwtker4demcwlxt",
-    port: "3306"
+    port: "3306",
   });
 
   //  Attempt Connection to database
@@ -79,6 +79,39 @@ if (!isDev && cluster.isMaster) {
   app.get('/api', function (req, res) {
     res.set('Content-Type', 'application/json');
     res.send('{"message":"Hello from the custom server!"}');
+  });
+
+
+  app.post('/api/schools', function (req, res) {
+    let message = {};
+
+    let sql = "";
+
+  });
+
+
+  app.get('/api/events', function (req, res){
+    let message = {};
+    /*
+    let sql = "";
+    let userID = req.body['userID'];
+    let sessionID = req.body['sessionID'];
+
+    if( userID == null && sessionID == null){     
+      sql = `SELECT * FROM view_events_public`;
+    }else {
+      sql = `CALL proc_events_available( '${userID}' , '${sessionID}' );`;
+    }
+
+    conn.query(sql, function(result){
+      message = result;
+      res.set('Content-Type', 'application/json');
+      res.send(message);
+    });
+    */
+
+   res.set('Content-Type', 'application/json');
+   res.send(message);
   });
 
   //  Register a new User Account
