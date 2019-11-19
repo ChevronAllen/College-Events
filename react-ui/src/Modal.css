@@ -8,3 +8,12 @@
   border-bottom: 0px;
   border-top: 0px;
 }
+
+.modal-content-event {
+  max-width: 800px;
+}
+.modal-background-event {
+  background-color: rgb(255, 255, 255);
+  border-bottom: 0px;
+  border-top: 0px;
+}

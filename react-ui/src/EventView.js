@@ -1,20 +1,26 @@
 import React, {Component} from 'react';
-import './RSOCreation.css';
+import PropTypes from 'prop-types';
+import './Events.css';
 import MapContainer from './MapContainer.js';
-import { Button, Form, FormGroup, Label, Input, FormText } from 'reactstrap';
+import { Card, Button, CardTitle, CardText, Row, Col } from 'reactstrap';
 
-class RSOCreation extends Component {
+class EventView extends Component {
   
+  static propTypes = {
+    event: PropTypes.object.isRequired,
+  };
+
   constructor(props) {
     super(props);
 
     this.state = {
-      nameRSO: "",
-      descriptionRSO: "",
-      userID: localStorage.getItem('userID') || ''
+      event: {},
     }
     this.handleChange = this.handleChange.bind(this);
     this.tryRSOCreate = this.tryRSOCreate.bind(this);
+    this.state.event = this.props.event;
+    console.log(this.state.event);
+    console.log("hello?");
   }
 
   handleChange = event => {
@@ -51,22 +57,13 @@ class RSOCreation extends Component {
   }
 
   render() {
+    
     return (
-    <div className="container">
-      <Form>
-      <FormGroup>
-        <Label for="nameRSO">Name of RSO</Label>
-        <Input type="text" name="name" id="nameRSO" onChange={this.handleChange.bind(this)} />
-      </FormGroup>
-      <FormGroup>
-        <Label for="descriptionRSO">description</Label>
-        <Input type="textarea" name="description" id="descriptionRSO" onChange={this.handleChange.bind(this)} />
-      </FormGroup>
-      <Button color="primary" onClick={this.tryRSOCreate}>Submit</Button>
-    </Form>
+    <div className="eventView">
+      hello
     </div>
   );
 }
 }
 
-export default RSOCreation;
+export default EventView;

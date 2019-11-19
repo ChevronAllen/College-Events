@@ -1,10 +1,10 @@
 import React, {Component} from 'react';
-import './EventCreation.css';
+import './Events.css';
 import MapContainer from './MapContainer.js';
 import { Col, Row, Button, Form, FormGroup, Label, Input, FormText } from 'reactstrap';
 import urllib from 'url';
 
-class LandingPage extends Component {
+class EventCreation extends Component {
   
   constructor(props) {
     super(props);
@@ -178,4 +178,4 @@ class LandingPage extends Component {
 }
 }
 
-export default LandingPage;
+export default EventCreation;

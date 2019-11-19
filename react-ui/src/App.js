@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { BrowserRouter as Router, Switch, Route} from 'react-router-dom';
+import { BrowserRouter as Router, Switch, Route, Link} from 'react-router-dom';
 import { Navbar, NavbarBrand, Nav, NavItem, NavLink,} from 'reactstrap';
 import './App.css';
 import LoginPage from './LoginPage';
@@ -7,6 +7,8 @@ import LandingPage from './LandingPage';
 import AdminPage from './AdminPage';
 import RSOCreation from './RSOCreation';
 import EventCreation from './EventCreation';
+import EventsView from './EventsView';
+import EventView from './EventView';
 import leftBanner from "./Images/LeftBanner.jpg"
 import rightBanner from "./Images/RightBanner.jpg"
 
@@ -37,6 +39,9 @@ class App extends Component {
             <NavItem>
               <NavLink href="/EventCreation">Create Event</NavLink>
             </NavItem>
+            <NavItem>
+              <NavLink href="/EventsView">View Events</NavLink>
+            </NavItem>
           </Nav>
         </Navbar>
           <Switch>
@@ -45,6 +50,8 @@ class App extends Component {
               <Route path='/AdminPage' component={AdminPage} />
               <Route path='/RSOCreation' component={RSOCreation} />
               <Route path='/EventCreation' component={EventCreation} />
+              <Route path='/EventsView' component={EventsView} />
+              <Route path='/EventView' component={EventView} />
           </Switch>
         </div>
       </Router>
