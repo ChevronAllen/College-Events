@@ -125,7 +125,7 @@ if (!isDev && cluster.isMaster) {
             message['error'] = 1;
             message['error_description'] = ERROR_CONN;
           }else{
-            message['rsoID'] = result[0][0]['rsoID'];
+            message['rsoID'] = result; //result[0][0]['rsoID'];
           }
 
           res.set('Content-Type', 'application/json');
@@ -135,7 +135,7 @@ if (!isDev && cluster.isMaster) {
 
       }else{
         console.log('invalid user');
-        
+
         res.set('Content-Type', 'application/json');
         res.send(JSON.stringify(message));
       }
