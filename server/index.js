@@ -205,6 +205,16 @@ if (!isDev && cluster.isMaster) {
     
   });
 
+  app.post('/api/comment/create', function(req, res){
+
+  });
+  app.post('/api/comment/update', function(req, res){
+    
+  });
+  app.post('/api/comment/delete', function(req, res){
+    
+  });
+
   //  Register a new User Account
   app.post('/api/register', function (req, res) {
     
