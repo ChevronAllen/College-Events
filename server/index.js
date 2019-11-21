@@ -21,6 +21,8 @@ const ERROR_CONN = "Connection Error";
 const ERROR_LOGIN = "Incorrect Username/Password combination";
 const ERROR_REG_EXISTS = "An account already exists with that email";
 
+const VALIDATION_SQL  = `SELECT fn_session_valid('{0}', '{1}') AS 'valid';`;
+
 
 
 
@@ -32,6 +34,27 @@ function generateSalt(){
     salt = salt + SALT_RANGE[rand];
   }
   return salt;
+}
+
+function validateUser(userID, sessionID){
+
+  return new Promise(function(resolve,reject){
+    conn.query(VALIDATION_SQL,userID,sessionID,function(err, results){
+      if(err){
+        reject(err.toString);
+      }
+      try{
+        if(results[0]['valid'] == NULL){
+          resolve(true);
+        }else{
+          resolve(false);
+        }
+      } catch(error){
+        reject(error.toString);
+      }
+
+    });
+  });
 }
 
 
