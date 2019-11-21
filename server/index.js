@@ -52,7 +52,6 @@ function validateUser(userID, sessionID){
       } catch(error){
         reject(error.toString);
       }
-
     });
   });
 }
@@ -229,6 +228,46 @@ if (!isDev && cluster.isMaster) {
   });
 
   app.post('/api/comment/create', function(req, res){
+    let userID = req.body['userID'];
+    let sessionID = req.body['sessionID'];
+    let comment = req.body['comment'];
+    let parent = req.body['parent'];
+    let event = req.body['event'];
+
+
+    let message = {error: null};
+
+    validateUser(userID,sessionID).then(
+      (resolve => {
+        // Run comment Create        
+        let sql = `CALL proc_comment_create( '${comment}', '${parent}', '${event}', '${userID}')`;
+
+        return new Promise(function(){
+          conn.query(sql,function(err,results){
+            if(err){
+              reject({error: 1, error_description: ERROR_CONN});
+            }else{
+              resolve(results[0][0]);      
+            }
+          });
+        });
+
+      }),
+      (reject=>{
+        // send credential error
+
+        message['error'] = 1
+        message['error_description'] = ERROR_LOGIN + '\n' + reject;
+
+        return Promise( ()=>{
+          resolve(message);
+        });
+
+      })
+    ).then(function(value){
+        res.set('Content-Type', 'application/json');
+        res.send(JSON.stringify(message));
+    });
 
   });
   app.post('/api/comment/update', function(req, res){
