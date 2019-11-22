@@ -14,13 +14,11 @@ class EventView extends Component {
     super(props);
 
     this.state = {
-      event: {},
+      event: localStorage.getItem('currentEvent')
     }
     this.handleChange = this.handleChange.bind(this);
     this.tryRSOCreate = this.tryRSOCreate.bind(this);
-    this.state.event = this.props.event;
     console.log(this.state.event);
-    console.log("hello?");
   }
 
   handleChange = event => {
@@ -60,7 +58,7 @@ class EventView extends Component {
     
     return (
     <div className="eventView">
-      hello
+      {this.state.event}
     </div>
   );
 }

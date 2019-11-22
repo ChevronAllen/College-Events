@@ -12,6 +12,7 @@ class EventCard extends Component {
   
   static propTypes = {
     event: PropTypes.object.isRequired,
+    handleRedirect: PropTypes.func
   };
 
   constructor(props) {
@@ -85,7 +86,7 @@ class EventCard extends Component {
           <CardTitle>{this.state.event['eventName']}</CardTitle>
     <CardText>{this.state.event['startDate']}{' at '}{this.state.event['startTime']}</CardText>
           <CardText>{this.state.event['endDate']}{' at '}{this.state.event['endTime']}</CardText>
-          <Button onClick={this.toggleEvent}>View</Button>
+          <Button onClick={()=>{localStorage.setItem("currentEvent", JSON.stringify(this.state.event));this.props.handleRedirect()}}>View</Button>
 
         </Card>
         <Modal isOpen={this.state.eventModal} toggle={this.toggleEvent} className={"eventModal modal-content-event"} onOpened={this.tryLocate}>
