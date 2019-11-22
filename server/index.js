@@ -208,7 +208,7 @@ if (!isDev && cluster.isMaster) {
   //  Register a new User Account
   app.post('/api/register', function (req, res) {
     
-    var message = {}; //  Response object
+    var message = {error: null}; //  Response object
 
     var email = req.body['email'];
     var password = req.body['password']; // pre hashed (md5) password
@@ -218,17 +218,8 @@ if (!isDev && cluster.isMaster) {
     var auth = crytpo.createHmac(HASH_ALGO, salt );
     auth = auth.update(password).digest(HASH_OUT_FORMAT);    
     
-
-    // Server debug data
-    let debug = {};
-    debug['sessionID'] = req.session['sessionID'];
-    debug['email'] = email;
-    debug['salt'] = salt;
-    debug['hash'] = auth;
-    debug['response'] = message;
-    console.log(debug);
-
-    let sql = `CALL euwtker4demcwlxt.proc_user_register('${email}', '${salt}', '${auth}' )`;
+   
+    let sql = `CALL euwtker4demcwlxt.proc_user_register('${email}', '${salt}', '${auth}' );`;
       
     message['sesssionID'] = req.session['sessionID'];
 
@@ -236,18 +227,18 @@ if (!isDev && cluster.isMaster) {
       //  Process query result
       if(err){
         message['error'] = 1; 
-        message['error_descr'] = ERROR_CONN;
+        message['error_description'] = ERROR_CONN;
         message['userID'] = null;
         message['debug'] = err;
       }else{
 
         message['userID'] = result[0][0]['userID'];
+        message['sessionID'] = result[0][0]['sessionID'];        
 
-        if(message['userID'] == null){
+        if(result[0][0]['error'] != null){
           message['error'] = 1; 
-          message['error_descr'] = ERROR_REG_EXISTS;
-        }
-        
+          message['error_descr'] = ERROR_REG_EXISTS + '\n' + result[0][0]['error'];
+        }        
       }
       
       res.set('Content-Type', 'application/json');
@@ -258,7 +249,7 @@ if (!isDev && cluster.isMaster) {
 
   //  Login to an existing user account
   app.post('/api/login', function (req, res) {
-    let message = {};
+    let message = {error:null};
     
     let email = req.body['email'];
     let password = req.body['password'];
@@ -273,7 +264,7 @@ if (!isDev && cluster.isMaster) {
         message['error_descr'] = ERROR_CONN;
         salt = null;
       }else{
-        salt = result[0]['salt']+"";
+        salt = result[0]['salt'];
       }
 
       // Stop here if no salt is returned
@@ -281,14 +272,6 @@ if (!isDev && cluster.isMaster) {
         
         let auth = crytpo.createHmac(HASH_ALGO, salt );
         auth = auth.update(password).digest(HASH_OUT_FORMAT);
-        
-        let debug = {};
-        debug['sessionID'] = req.sessionID;
-        debug['email'] = email;
-        debug['salt'] = salt;
-        debug['hash'] = auth;
-        debug['response'] = message;
-        console.log(debug);
         
         //  Login 
         sql = `CALL euwtker4demcwlxt.proc_user_login( '${email}', '${auth}' );`;        
@@ -301,21 +284,16 @@ if (!isDev && cluster.isMaster) {
           }else{
             
             message['userID'] = result[0][0]['userID'];
+            message['sessionID'] = result[0][0]['sessionID'];
             
-            if(message['userID'] == null){
-              message['userID'] = null;
+            if(result[0][0]['error'] != null){
               message['error'] = 1;
               message['error_descr'] = ERROR_LOGIN;
-            }else{
-
-              req.session['sessionID'] = result[0][0]['sessionID'];
-              req.session['userID']    = result[0][0]['userID'];
-              
-            } 
+            }
             
           }    
           
-          console.log(req.session);
+          
           res.set('Content-Type', 'application/json');
           res.send(JSON.stringify(message));
         });
@@ -323,6 +301,7 @@ if (!isDev && cluster.isMaster) {
       }else{
         message['error'] = 1;
         message['error_descr'] = ERROR_LOGIN;
+        
         res.set('Content-Type', 'application/json');
         res.send(JSON.stringify(message));
       }
