@@ -237,7 +237,7 @@ if (!isDev && cluster.isMaster) {
 
         if(result[0][0]['error'] != null){
           message['error'] = 1; 
-          message['error_descr'] = ERROR_REG_EXISTS + '\n' + result[0][0]['error'];
+          message['error_descr'] = result[0][0]['error'];
         }        
       }
       
@@ -288,7 +288,7 @@ if (!isDev && cluster.isMaster) {
             
             if(result[0][0]['error'] != null){
               message['error'] = 1;
-              message['error_descr'] = ERROR_LOGIN;
+              message['error_descr'] = result[0][0]['error'];
             }
             
           }    
@@ -301,7 +301,7 @@ if (!isDev && cluster.isMaster) {
       }else{
         message['error'] = 1;
         message['error_descr'] = ERROR_LOGIN;
-        
+
         res.set('Content-Type', 'application/json');
         res.send(JSON.stringify(message));
       }
