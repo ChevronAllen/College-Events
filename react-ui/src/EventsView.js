@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { Redirect } from 'react-router'
+import { Redirect } from 'react-router';
 import './Events.css';
 import EventCard from './EventCard';
 import MapContainer from './MapContainer.js';
@@ -75,7 +75,6 @@ class EventsView extends Component {
 
   render() {
 
-    console.log(this.state.redirect);
     if (this.state.redirect) {
       return <Redirect to='/EventView'/>;
     }
@@ -91,7 +90,6 @@ class EventsView extends Component {
       <Row>
       {events}
       </Row>
-      <Button onClick={this.handleRedirect}>re</Button>
     </div>
   );
 }

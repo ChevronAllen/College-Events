@@ -13,6 +13,27 @@ import leftBanner from "./Images/LeftBanner.jpg"
 import rightBanner from "./Images/RightBanner.jpg"
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      loginModal: false,
+      registerModal: false
+    }
+
+    this.toggleLogin = this.toggleLogin.bind(this);
+    this.toggleRegister = this.toggleRegister.bind(this);
+  }
+
+  toggleLogin = () => {
+    let setToggle = !this.state.loginModal;
+    this.setState({ loginModal: setToggle, registerModal: false, email: "", password: "" });
+  }
+
+  toggleRegister = () => {
+    let setToggle = !this.state.registerModal;
+    this.setState({ registerModal: setToggle, loginModal: false, email: "", password: "" });
+  }
+
   render() {
   return (
     <div className="App">
@@ -25,7 +46,7 @@ class App extends Component {
         <NavbarBrand href="/">Home</NavbarBrand>
           <Nav className="ml-auto" navbar>
             <NavItem>
-              <NavLink href="/LoginPage">Login</NavLink>
+              <div className="nav-link" style={{cursor: "pointer"}} onClick={this.toggleLogin}>Login</div>
             </NavItem>
             <NavItem>
               <NavLink href="/AdminPage">AdminPage</NavLink>
@@ -43,7 +64,6 @@ class App extends Component {
         </Navbar>
           <Switch>
               <Route exact path='/' component={LandingPage} />
-              <Route path='/LoginPage' component={LoginPage} />
               <Route path='/AdminPage' component={AdminPage} />
               <Route path='/RSOCreation' component={RSOCreation} />
               <Route path='/EventCreation' component={EventCreation} />
@@ -55,9 +75,13 @@ class App extends Component {
       <div className="rightBannerDiv">
         <img id="rightBanner" src={rightBanner} alt=""/>
       </div>
+      <LoginPage 
+        loginModal = {this.state.loginModal}
+        registerModal = {this.state.registerModal}
+        toggleLogin = {this.toggleLogin}
+        toggleRegister = {this.toggleRegister}
+      />
     </div>
-
-  
   );
   }
 }
