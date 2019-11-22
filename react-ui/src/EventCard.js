@@ -7,7 +7,6 @@ import MapContainer from './MapContainer.js';
 import {  Modal, ModalHeader, ModalBody, ModalFooter, Form, FormGroup, Input, Card, Button, CardTitle, CardText, Row, Col } from 'reactstrap';
 
 Geocode.setApiKey("AIzaSyAyKupRQtPiJHfUutD2aeWE1WFdnTBd_Jc");
-Geocode.enableDebug();
 
 class EventCard extends Component {
   
