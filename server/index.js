@@ -21,6 +21,8 @@ const ERROR_CONN = "Connection Error";
 const ERROR_LOGIN = "Incorrect Username/Password combination";
 const ERROR_REG_EXISTS = "An account already exists with that email";
 
+const VALIDATION_SQL  = `SELECT fn_session_valid('{0}', '{1}') AS 'valid';`;
+
 
 
 
@@ -32,6 +34,34 @@ function generateSalt(){
     salt = salt + SALT_RANGE[rand];
   }
   return salt;
+}
+
+function validateUser(userID, sessionID){
+
+  return new Promise(function(resolve,reject){
+    conn.query(VALIDATION_SQL,[userID,sessionID], function(err, results){
+      
+      if(err){
+        reject(err.toString());
+      }
+
+      try{
+        console.log(results[0]);
+        if( results[0]['valid'] == 1){
+          resolve(true);
+        }else{
+          resolve(false);
+        }
+
+      } catch(error){
+
+        reject(error.toString());
+
+      }
+
+    });
+
+  });
 }
 
 
@@ -148,7 +178,54 @@ if (!isDev && cluster.isMaster) {
   });
 
 
-  
+  app.post('/api/events', function (req, res) {
+    console.log("hello");
+    let message = {error: null};
+
+    let userID = req.body['userID'];
+    let sessionID = req.body['sessionID'];
+    
+    validateUser(userID,sessionID)
+    .then(function(value){
+      // Valid User
+
+      let sql =  `CALL euwtker4demcwlxt.proc_events_available( '${userID}' )`;
+
+      conn.query(sql,function(err,results){
+
+        if(err){
+          message['error'] = 1; 
+          message['error_description'] = ERROR_CONN;
+        }else{          
+          message['events'] = results[0];          
+        }
+         
+        res.set('Content-Type', 'application/json');
+        res.send(message);      
+
+      });
+     
+
+    },function(value){
+      // Invalid User
+      message['error'] = 1;
+      message['error_description'] = value;
+
+      res.set('Content-Type', 'application/json');
+      res.send(message);
+    })
+    .catch(function(error){
+      console.log(error);
+      message['error'] = 1;
+      message['error_description'] = error; 
+      console.log(message);
+      res.send(message);
+    });
+    
+
+  });
+
+  /*
   app.post('/api/events/create', function (req, res){
     let message = {error: 0};
 
@@ -162,9 +239,8 @@ if (!isDev && cluster.isMaster) {
     let rsoID =  'eb843f8c-0aea-11ea-a27d-0649c169819a';//req.body['rsoID']
     let schoolID = 'f7858ec0-0a6d-11ea-a27d-0649c169819a' ;//req.body['schoolID']
     
-    let userID = req.session['userID'];
-    let sessionID = req.session['sessionID'];
-
+    let userID = req.body['userID'];
+    let sessionID = req.body['sessionID'];
 
 
     let sql = `SELECT fn_session_valid('${userID}', '${sessionID}') AS 'valid';`;
@@ -202,6 +278,57 @@ if (!isDev && cluster.isMaster) {
         });       
       }        
     });   
+    
+  });
+  */
+
+  app.post('/api/comment/create', function(req, res){
+    let userID = req.body['userID'];
+    let sessionID = req.body['sessionID'];
+    let comment = req.body['comment'];
+    let parent = req.body['parent'];
+    let event = req.body['event'];
+
+
+    let message = {error: null};
+
+    validateUser(userID,sessionID).then(
+      (resolve => {
+        // Run comment Create        
+        let sql = `CALL proc_comment_create( '${comment}', '${parent}', '${event}', '${userID}')`;
+
+        return new Promise(function(){
+          conn.query(sql,function(err,results){
+            if(err){
+              reject({error: 1, error_description: ERROR_CONN});
+            }else{
+              resolve(results[0][0]);      
+            }
+          });
+        });
+
+      }),
+      (reject=>{
+        // send credential error
+
+        message['error'] = 1
+        message['error_description'] = ERROR_LOGIN + '\n' + reject;
+
+        return Promise( ()=>{
+          resolve(message);
+        });
+
+      })
+    ).then(function(value){
+        res.set('Content-Type', 'application/json');
+        res.send(JSON.stringify(message));
+    });
+
+  });
+  app.post('/api/comment/update', function(req, res){
+    
+  });
+  app.post('/api/comment/delete', function(req, res){
     
   });
 
