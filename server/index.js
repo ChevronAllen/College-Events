@@ -39,20 +39,28 @@ function generateSalt(){
 function validateUser(userID, sessionID){
 
   return new Promise(function(resolve,reject){
-    conn.query(VALIDATION_SQL,userID,sessionID,function(err, results){
+    conn.query(VALIDATION_SQL,[userID,sessionID], function(err, results){
+      
       if(err){
-        reject(err.toString);
+        reject(err.toString());
       }
+
       try{
-        if(results[0]['valid'] == NULL){
+        console.log(results[0]);
+        if( results[0]['valid'] == 1){
           resolve(true);
         }else{
           resolve(false);
         }
+
       } catch(error){
-        reject(error.toString);
+
+        reject(error.toString());
+
       }
+
     });
+
   });
 }
 
@@ -174,32 +182,49 @@ if (!isDev && cluster.isMaster) {
     console.log("hello");
     let message = {error: null};
 
-    //let userID = req.body['userID'];
-    //let sessionID = req.body['sessionID'];
-
-    /*
+    let userID = req.body['userID'];
+    let sessionID = req.body['sessionID'];
+    
     validateUser(userID,sessionID)
     .then(function(value){
       // Valid User
-      message['error'] = 'User Valid';
-      console.log(message);
-      res.send(message);
+
+      let sql =  `CALL euwtker4demcwlxt.proc_events_available( '${userID}' )`;
+
+      conn.query(sql,function(err,results){
+
+        if(err){
+          message['error'] = 1; 
+          message['error_description'] = ERROR_CONN;
+        }else{          
+          message['events'] = results[0];          
+        }
+         
+        res.set('Content-Type', 'application/json');
+        res.send(message);      
+
+      });
+     
+
     },function(value){
       // Invalid User
-      message['error'] = 'User Invalid';
-      console.log(message);
+      message['error'] = 1;
+      message['error_description'] = value;
+
+      res.set('Content-Type', 'application/json');
       res.send(message);
     })
     .catch(function(error){
       console.log(error);
       message['error'] = 1;
       message['error_description'] = error; 
-      consol.log(message);
+      console.log(message);
       res.send(message);
     });
-    */
+    
 
   });
+
   /*
   app.post('/api/events/create', function (req, res){
     let message = {error: 0};

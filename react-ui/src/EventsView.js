@@ -51,8 +51,8 @@ class EventsView extends Component {
     postBody['sessionID']= localStorage.getItem('sessionID');
     console.log(JSON.stringify(postBody));
     
-    /*
-    fetch("/api/", {
+    
+    fetch("/api/events", {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -65,7 +65,7 @@ class EventsView extends Component {
         console.log(data);
       })
     })).catch(err => err);
-    */
+    
   }
 
   componentDidMount(){
