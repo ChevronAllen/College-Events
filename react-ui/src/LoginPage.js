@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Col, Button, Modal, ModalHeader, ModalBody, ModalFooter, Form, FormGroup, Input } from 'reactstrap';
+import { Redirect } from 'react-router';
 import './Modal.css';
 
 const md5 = require('md5');
@@ -11,13 +12,10 @@ class LoginPage extends Component {
     this.state = {
       email: "",
       password: "",
-      loginToggle: "",
-      loginModal: false,
-      registerModal: false
+      redirect: false
     }
     this.handleChange = this.handleChange.bind(this);
-    this.toggleLogin = this.toggleLogin.bind(this);
-    this.toggleRegister = this.toggleRegister.bind(this);
+    this.handleRedirect = this.handleRedirect.bind(this);
     this.tryLogin = this.tryLogin.bind(this);
     this.tryRegister = this.tryRegister.bind(this);
   }
@@ -28,15 +26,12 @@ class LoginPage extends Component {
     });
   }
 
-  toggleLogin = () => {
-    let setToggle = !this.state.loginModal;
-    this.setState({ loginModal: setToggle, registerModal: false, email: "", password: "" });
+  handleRedirect = () => {
+    this.setState({
+      redirect: true
+    });
   }
 
-  toggleRegister = () => {
-    let setToggle = !this.state.registerModal;
-    this.setState({ registerModal: setToggle, loginModal: false, email: "", password: "" });
-  }
 
   // API post format for react
   tryLogin(e) {    
@@ -58,6 +53,8 @@ class LoginPage extends Component {
       response.json().then(data =>{
         localStorage.setItem('userID', data['userID']);
         localStorage.setItem('sessionID', data['sessionID']);
+        this.setState({ loginModal: false });
+        this.handleRedirect();
       })
     })).catch(err => err);
     
@@ -83,6 +80,8 @@ class LoginPage extends Component {
       response.json().then(data =>{
         localStorage.setItem('userID', data['userID']);
         localStorage.setItem('sessionID', data['sessionID']);
+        this.setState({ registerModal: false });
+        this.handleRedirect();
       })
     })
     ).catch(err => err);
@@ -90,13 +89,15 @@ class LoginPage extends Component {
   }
 
   render() {
+
+    if (this.state.redirect) {
+      return <Redirect to='/'/>;
+    }
+
     return (
       <div>
-        <Button color="danger" onClick={this.toggleLogin}>Login</Button>
-        <Button color="danger" onClick={this.toggleRegister}>Register</Button>
-
-        <Modal isOpen={this.state.loginModal} toggle={this.toggleLogin} className={"LoginModal"}>
-          <ModalHeader toggle={this.toggleLogin} className={"modal-background"}>Login</ModalHeader>
+        <Modal isOpen={this.props.loginModal} toggle={this.props.toggleLogin} className={"LoginModal"}>
+          <ModalHeader toggle={this.props.toggleLogin} className={"modal-background"}>Login</ModalHeader>
           <ModalBody className={"modal-background"}>
             <Form>
               <FormGroup row className={"d-flex justify-content-center"}>
@@ -112,14 +113,14 @@ class LoginPage extends Component {
             </Form>
           </ModalBody>
           <ModalFooter className={"modal-background"}>
-            <Button color="primary" onClick={this.toggleRegister} className={"mr-auto"} >Register</Button>
+            <Button color="primary" onClick={this.props.toggleRegister} className={"mr-auto"} >Register</Button>
             <Button color="primary" onClick={this.tryLogin}>Login</Button>{' '}
-            <Button color="secondary" onClick={this.toggleLogin}>Cancel</Button>
+            <Button color="secondary" onClick={this.props.toggleLogin}>Cancel</Button>
           </ModalFooter>
         </Modal>
 
-        <Modal isOpen={this.state.registerModal} toggle={this.toggleRegister} className={"LoginModal"}>
-          <ModalHeader toggle={this.toggleRegister} className={"modal-background"}>Registration</ModalHeader>
+        <Modal isOpen={this.props.registerModal} toggle={this.props.toggleRegister} className={"LoginModal"}>
+          <ModalHeader toggle={this.props.toggleRegister} className={"modal-background"}>Registration</ModalHeader>
           <ModalBody className={"modal-background"}>
             <Form>
               <FormGroup row className={"d-flex justify-content-center"}>
@@ -135,9 +136,9 @@ class LoginPage extends Component {
             </Form>
           </ModalBody>
           <ModalFooter className={"modal-background"}>
-            <Button color="primary" onClick={this.toggleLogin} className={"mr-auto"} >Login</Button>
+            <Button color="primary" onClick={this.props.toggleLogin} className={"mr-auto"} >Login</Button>
             <Button color="primary" onClick={this.tryRegister}>Register</Button>{' '}
-            <Button color="secondary" onClick={this.toggleRegister}>Cancel</Button>
+            <Button color="secondary" onClick={this.props.toggleRegister}>Cancel</Button>
           </ModalFooter>
         </Modal>
       </div>
