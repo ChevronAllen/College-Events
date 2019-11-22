@@ -15,6 +15,7 @@ events:[
 {eventName: "Counter Protest", lat:"27.902427", lng:"-81.20006", startDate:"12/12/19", startTime:"7:00pm", endDate:"12/12/19", endTime:"9:00pm", hostRSO:"", descEvent:"Protesting for less sleep time"},
 ]
 };
+
 class EventsView extends Component {
   
   constructor(props) {
@@ -76,12 +77,13 @@ class EventsView extends Component {
 
     console.log(this.state.redirect);
     if (this.state.redirect) {
-      return <Redirect to='/AdminPage'/>;
+      return <Redirect to='/EventView'/>;
     }
 
     let events = this.state.viewList.map((item)=> {
       return <Col sm="4" className={"cardCol"} key={item.eventName}><EventCard 
         event={item}
+        handleRedirect={this.handleRedirect}
       /></Col>
     })
     return (
