@@ -170,7 +170,37 @@ if (!isDev && cluster.isMaster) {
   });
 
 
-  
+  app.post('/api/events', function (req, res) {
+    console.log("hello");
+    let message = {error: null};
+
+    //let userID = req.body['userID'];
+    //let sessionID = req.body['sessionID'];
+
+    /*
+    validateUser(userID,sessionID)
+    .then(function(value){
+      // Valid User
+      message['error'] = 'User Valid';
+      console.log(message);
+      res.send(message);
+    },function(value){
+      // Invalid User
+      message['error'] = 'User Invalid';
+      console.log(message);
+      res.send(message);
+    })
+    .catch(function(error){
+      console.log(error);
+      message['error'] = 1;
+      message['error_description'] = error; 
+      consol.log(message);
+      res.send(message);
+    });
+    */
+
+  });
+  /*
   app.post('/api/events/create', function (req, res){
     let message = {error: 0};
 
@@ -184,9 +214,8 @@ if (!isDev && cluster.isMaster) {
     let rsoID =  'eb843f8c-0aea-11ea-a27d-0649c169819a';//req.body['rsoID']
     let schoolID = 'f7858ec0-0a6d-11ea-a27d-0649c169819a' ;//req.body['schoolID']
     
-    let userID = req.session['userID'];
-    let sessionID = req.session['sessionID'];
-
+    let userID = req.body['userID'];
+    let sessionID = req.body['sessionID'];
 
 
     let sql = `SELECT fn_session_valid('${userID}', '${sessionID}') AS 'valid';`;
@@ -226,6 +255,7 @@ if (!isDev && cluster.isMaster) {
     });   
     
   });
+  */
 
   app.post('/api/comment/create', function(req, res){
     let userID = req.body['userID'];
