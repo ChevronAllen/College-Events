@@ -1,10 +1,12 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
+import Geocode from "react-geocode";
 import './Events.css';
 import EventView from './EventView';
 import MapContainer from './MapContainer.js';
 import {  Modal, ModalHeader, ModalBody, ModalFooter, Form, FormGroup, Input, Card, Button, CardTitle, CardText, Row, Col } from 'reactstrap';
 
+Geocode.setApiKey("AIzaSyAyKupRQtPiJHfUutD2aeWE1WFdnTBd_Jc");
 
 class EventCard extends Component {
   
@@ -64,21 +66,15 @@ class EventCard extends Component {
   }
 
   tryLocate(e){    
-    let url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng='+ this.state.event.lat +',' 
-              + this.state.event.lng + '&key=' + this.state.apiKey;
-    fetch(url, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
+
+    Geocode.fromLatLng(this.state.event.lat, this.state.event.lng).then(
+      response => {
+        this.setState({address:response.results[0].formatted_address});
+      },
+      error => {
+        console.error(error);
       }
-    })
-    .then((response => {
-      response.json().then(data =>{
-        this.setState({address:data['results'][0]['formatted_address']});
-      })
-    })).catch(err => err);
+    );
   }
 
   render() {

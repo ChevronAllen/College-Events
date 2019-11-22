@@ -56,8 +56,8 @@ class LoginPage extends Component {
     })
     .then((response => {
       response.json().then(data =>{
-        console.log('success');
-        localStorage.setItem('userID', "500");
+        localStorage.setItem('userID', data['userID']);
+        localStorage.setItem('sessionID', data['sessionID']);
       })
     })).catch(err => err);
     
@@ -81,8 +81,8 @@ class LoginPage extends Component {
     })
     .then((response => {
       response.json().then(data =>{
-        console.log('success');
-        localStorage.setItem('userID', "500");
+        localStorage.setItem('userID', data['userID']);
+        localStorage.setItem('sessionID', data['sessionID']);
       })
     })
     ).catch(err => err);
