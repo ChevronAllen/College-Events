@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import { Redirect } from 'react-router'
 import './Events.css';
 import EventCard from './EventCard';
 import MapContainer from './MapContainer.js';
@@ -21,10 +22,12 @@ class EventsView extends Component {
 
     this.state = {
       eventList: [],
-      viewList: []
+      viewList: [],
+      redirect: false
     }
     this.handleChange = this.handleChange.bind(this);
-    this.tryRSOCreate = this.tryRSOCreate.bind(this);
+    this.tryGetEvents = this.tryGetEvents.bind(this);
+    this.handleRedirect = this.handleRedirect.bind(this);
     this.state.eventList = testJson["events"];
     this.state.viewList = this.state.eventList;
   }
@@ -35,12 +38,17 @@ class EventsView extends Component {
     });
   }
 
-  tryRSOCreate(e){    
+  handleRedirect = () => {
+    this.setState({
+      redirect: true
+    });
+  }
+
+  tryGetEvents(e){    
     let postBody = {};   
     
-    postBody['nameRSO']= this.state.nameRSO;
-    postBody['descriptionRSO']= this.state.descriptionRSO;
-    postBody['userID']= this.state.userID;
+    postBody['userID']= localStorage.getItem('userID');
+    postBody['sessionID']= localStorage.getItem('sessionID');
     console.log(JSON.stringify(postBody));
     
     /*
@@ -52,17 +60,25 @@ class EventsView extends Component {
       },
       body: JSON.stringify(postBody)
     })
-    .then(  (response)=>{
-        console.log('success');
-    }).catch(err => err);
+    .then((response => {
+      response.json().then(data =>{
+        console.log(data);
+      })
+    })).catch(err => err);
     */
   }
 
   componentDidMount(){
-    console.log(localStorage.getItem('userID'));
+    this.tryGetEvents();
   }
 
   render() {
+
+    console.log(this.state.redirect);
+    if (this.state.redirect) {
+      return <Redirect to='/AdminPage'/>;
+    }
+
     let events = this.state.viewList.map((item)=> {
       return <Col sm="4" className={"cardCol"} key={item.eventName}><EventCard 
         event={item}
@@ -73,6 +89,7 @@ class EventsView extends Component {
       <Row>
       {events}
       </Row>
+      <Button onClick={this.handleRedirect}>re</Button>
     </div>
   );
 }
