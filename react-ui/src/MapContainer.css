@@ -3,4 +3,6 @@
 .mapContainer {
   height: 50vh !important;
   width: 50vw !important;
+  text-align: center !important;
+  position: sticky !important;
 }
