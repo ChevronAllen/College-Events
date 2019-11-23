@@ -87,7 +87,7 @@ class EventsView extends Component {
       /></Col>
     })
     return (
-    <div className="events">
+    <div className="events events-container">
       <Row>
       {events}
       </Row>
