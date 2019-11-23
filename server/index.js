@@ -229,6 +229,8 @@ if (!isDev && cluster.isMaster) {
     
     let sql = `SELECT fn_session_valid('${userID}', '${sessionID}') AS 'valid';`;
 
+    console.log(req.body);
+
     validateUser(userID,sessionID)
     .then(function(value){
       // Valid User
