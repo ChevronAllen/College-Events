@@ -76,10 +76,11 @@ class EventCreation extends Component {
     Geocode.fromAddress(this.state.address + ' ' + this.state.city + ' ' + this.state.state).then(
       response => {
         const { lat, lng } = response.results[0].geometry.location;
-        console.log(lat, lng);
+
         location['lat'] = lat;
         location['lng'] = lng;
-        console.log(location);
+
+
         postBody['userID']= localStorage.getItem('userID');
         postBody['sessionID']= localStorage.getItem('sessionID');
         postBody['nameEvent']= this.state.nameEvent;
@@ -91,7 +92,6 @@ class EventCreation extends Component {
         postBody['hostRSO']= this.state.hostRSO;
         postBody['private']= this.state.private;
         postBody['repeat']= this.state.repeat;
-        console.log(JSON.stringify(postBody));
 
         fetch("/api/events/create", {
           method: 'POST',
