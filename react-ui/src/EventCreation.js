@@ -3,6 +3,9 @@ import './Events.css';
 import MapContainer from './MapContainer.js';
 import { Col, Row, Button, Form, FormGroup, Label, Input, FormText } from 'reactstrap';
 import urllib from 'url';
+import Geocode from "react-geocode";
+
+Geocode.setApiKey("AIzaSyAyKupRQtPiJHfUutD2aeWE1WFdnTBd_Jc");
 
 class EventCreation extends Component {
   
@@ -20,9 +23,9 @@ class EventCreation extends Component {
       city: '',
       state: '',
       startDate: '',
-      startTime: '',
+      startTime: '00:00',
       endDate: '',
-      endTime: '',
+      endTime: '00:00',
       hostRSO: '',
       private: false,
       repeat:"never"
@@ -31,7 +34,7 @@ class EventCreation extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.checkPrivacy = this.checkPrivacy.bind(this);
     this.tryLocate = this.tryLocate.bind(this);
-    this.tryRSOCreate = this.tryRSOCreate.bind(this);
+    this.tryEventCreate = this.tryEventCreate.bind(this);
   }
 
   handleChange = event => {
@@ -62,40 +65,109 @@ class EventCreation extends Component {
     })).catch(err => err);
   }
 
-  tryRSOCreate(e){    
+  tryEventCreate(e){    
     let postBody = {};   
-    
-    postBody['nameEvent']= this.state.nameEvent;
-    postBody['descriptionEvent']= this.state.descriptionEvent;
-    postBody['userID']= this.state.userID;
-    postBody['lat']= this.state.lat;
-    postBody['lng']= this.state.lng;
-    postBody['startDate']= this.state.startDate;
-    postBody['startTime']= this.state.startTime;
-    postBody['endDate']= this.state.endDate;
-    postBody['endTime']= this.state.endTime;
-    postBody['hostRSO']= this.state.hostRSO;
-    postBody['private']= this.state.private;
-    postBody['repeat']= this.state.repeat;
 
-    console.log(JSON.stringify(postBody));
-    
-    
-    fetch("/api/events/create", {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
+    let ds = this.state.startDate + ' ' + this.state.startTime + ':00';
+    let de = this.state.endDate + ' ' + this.state.endTime + ':00';
+
+    let location = {}
+
+    Geocode.fromAddress(this.state.address + ' ' + this.state.city + ' ' + this.state.state).then(
+      response => {
+        const { lat, lng } = response.results[0].geometry.location;
+        console.log(lat, lng);
+        location['lat'] = lat;
+        location['lng'] = lng;
+        console.log(location);
+        postBody['userID']= localStorage.getItem('userID');
+        postBody['sessionID']= localStorage.getItem('sessionID');
+        postBody['nameEvent']= this.state.nameEvent;
+        postBody['descriptionEvent']= this.state.descriptionEvent;
+        postBody['userID']= this.state.userID;
+        postBody['location']= location;
+        postBody['startDate']= ds;
+        postBody['endDate']= de;
+        postBody['hostRSO']= this.state.hostRSO;
+        postBody['private']= this.state.private;
+        postBody['repeat']= this.state.repeat;
+        console.log(JSON.stringify(postBody));
+
+        fetch("/api/events/create", {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(postBody)
+        }).then(  (response)=>{
+          console.log('success');
+          console.log(response);
+        }).catch(err => err);
       },
-      body: JSON.stringify(postBody)
-    }).then(  (response)=>{
-      console.log('success');
-      console.log(response);
-    }).catch(err => err);
-    
+      error => {
+        console.error(error);
+      }
+    );
   }
 
   render() {
+
+    var stateList = 
+    <Input type="select" name="state" id="state" onChange={this.handleChange.bind(this)} >
+    <option value="AL">Alabama</option>
+    <option value="AK">Alaska</option>
+    <option value="AZ">Arizona</option>
+    <option value="AR">Arkansas</option>
+    <option value="CA">California</option>
+    <option value="CO">Colorado</option>
+    <option value="CT">Connecticut</option>
+    <option value="DE">Delaware</option>
+    <option value="DC">District Of Columbia</option>
+    <option value="FL">Florida</option>
+    <option value="GA">Georgia</option>
+    <option value="HI">Hawaii</option>
+    <option value="ID">Idaho</option>
+    <option value="IL">Illinois</option>
+    <option value="IN">Indiana</option>
+    <option value="IA">Iowa</option>
+    <option value="KS">Kansas</option>
+    <option value="KY">Kentucky</option>
+    <option value="LA">Louisiana</option>
+    <option value="ME">Maine</option>
+    <option value="MD">Maryland</option>
+    <option value="MA">Massachusetts</option>
+    <option value="MI">Michigan</option>
+    <option value="MN">Minnesota</option>
+    <option value="MS">Mississippi</option>
+    <option value="MO">Missouri</option>
+    <option value="MT">Montana</option>
+    <option value="NE">Nebraska</option>
+    <option value="NV">Nevada</option>
+    <option value="NH">New Hampshire</option>
+    <option value="NJ">New Jersey</option>
+    <option value="NM">New Mexico</option>
+    <option value="NY">New York</option>
+    <option value="NC">North Carolina</option>
+    <option value="ND">North Dakota</option>
+    <option value="OH">Ohio</option>
+    <option value="OK">Oklahoma</option>
+    <option value="OR">Oregon</option>
+    <option value="PA">Pennsylvania</option>
+    <option value="RI">Rhode Island</option>
+    <option value="SC">South Carolina</option>
+    <option value="SD">South Dakota</option>
+    <option value="TN">Tennessee</option>
+    <option value="TX">Texas</option>
+    <option value="UT">Utah</option>
+    <option value="VT">Vermont</option>
+    <option value="VA">Virginia</option>
+    <option value="WA">Washington</option>
+    <option value="WV">West Virginia</option>
+    <option value="WI">Wisconsin</option>
+    <option value="WY">Wyoming</option>
+    </Input>				
+
     return (
     <div className="container">
       <Form>
@@ -115,7 +187,7 @@ class EventCreation extends Component {
         </Col>
         <Col md={4}>
         <Label for="state">State</Label>
-        <Input type="text" name="state" id="state" onChange={this.handleChange.bind(this)} />
+         {stateList}
         </Col>
       </Row>
       </FormGroup>
@@ -123,11 +195,11 @@ class EventCreation extends Component {
       <Row form>
         <Col md={4}>
         <Label for="startDate">Start Date</Label>
-        <Input type="text" name="startDate" id="startDate" onChange={this.handleChange.bind(this)} />
+        <Input type="date" name="startDate" id="startDate" onChange={this.handleChange.bind(this)} />
         </Col>
         <Col md={4}>
         <Label for="startTime">Start Time</Label>
-        <Input type="text" name="startTime" id="startTime" onChange={this.handleChange.bind(this)} />
+        <Input type="time" name="startTime" id="startTime" defaultValue="00:00" onChange={this.handleChange.bind(this)} />
         </Col>
       </Row>
       </FormGroup>
@@ -135,11 +207,11 @@ class EventCreation extends Component {
       <Row form>
         <Col md={4}>
         <Label for="endDate">End Date</Label>
-        <Input type="text" name="endDate" id="endDate" onChange={this.handleChange.bind(this)} />
+        <Input type="date" name="endDate" id="endDate" onChange={this.handleChange.bind(this)} />
         </Col>
         <Col md={4}>
         <Label for="endTime">End Time</Label>
-        <Input type="text" name="endTime" id="endTime" onChange={this.handleChange.bind(this)} />
+        <Input type="time" name="endTime" id="endTime" defaultValue="00:00" onChange={this.handleChange.bind(this)} />
         </Col>
       </Row>
       </FormGroup>
@@ -169,7 +241,7 @@ class EventCreation extends Component {
         <Label for="descriptionEvent">Event Description</Label>
         <Input type="textarea" name="description" id="descriptionEvent" onChange={this.handleChange.bind(this)} />
       </FormGroup>
-      <Button color="primary" onClick={this.tryRSOCreate}>Submit</Button>
+      <Button color="primary" onClick={this.tryEventCreate}>Submit</Button>
     </Form>
     </div>
   );

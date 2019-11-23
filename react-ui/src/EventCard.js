@@ -65,7 +65,7 @@ class EventCard extends Component {
     var ds = new Date(this.state.event['eventDateStart']);
     var de = new Date(this.state.event['eventDateStart']);
     return (
-    <div className="eventCard">
+    <div className="eventCard" style={{textAlign: "center"}}>
 
       <Card body outline color="info">
           <CardTitle>{this.state.event['eventName']}</CardTitle>

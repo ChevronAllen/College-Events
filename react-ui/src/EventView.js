@@ -12,7 +12,7 @@ class EventView extends Component {
     super(props);
 
     this.state = {
-      event: localStorage.getItem('currentEvent')
+      event: JSON.parse(localStorage.getItem('currentEvent'))
     }
     this.handleChange = this.handleChange.bind(this);
     this.tryRSOCreate = this.tryRSOCreate.bind(this);
@@ -66,10 +66,12 @@ class EventView extends Component {
   }
 
   render() {
-    
+    console.log(this.state.event);
     return (
-    <div className="eventView">
-      {this.state.event}
+    <div className="eventView events-container">
+      <h1>{this.state.event['eventName']}</h1>
+      <br />
+      <h3>{this.state.event['eventDescription']}</h3>
     </div>
   );
 }
