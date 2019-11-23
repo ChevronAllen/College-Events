@@ -29,8 +29,6 @@ class EventsView extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.tryGetEvents = this.tryGetEvents.bind(this);
     this.handleRedirect = this.handleRedirect.bind(this);
-    this.state.eventList = testJson["events"];
-    this.state.viewList = this.state.eventList;
   }
 
   handleChange = event => {
@@ -63,7 +61,10 @@ class EventsView extends Component {
     })
     .then((response => {
       response.json().then(data =>{
-        console.log(data);
+        if(data['error'] === null)
+        {
+            this.setState({ eventList: data['events'], viewList: data['events']});
+        }
       })
     })).catch(err => err);
     
