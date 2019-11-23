@@ -6,7 +6,7 @@ export class MapContainer extends Component {
 
   render() {
     return (
-      <Map className={"mapContainer"} google={this.props.google} zoom={14} initialCenter={{ lat: this.props.lat, lng: this.props.lng}} styles={{position:"static"}}>
+      <Map className={"mapContainer"} google={this.props.google} zoom={14} initialCenter={{ lat: this.props.lat, lng: this.props.lng}}>
         
         <Marker onClick={this.onMarkerClick}
                 name={'Current location'} />

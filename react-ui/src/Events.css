@@ -9,6 +9,10 @@
   padding-top: 30px;
 }
 
+.comment {
+  text-align: left;
+}
+
 h1 {
   font-family: Lucida Sans Unicode;
   font-size: 30px;
