@@ -466,23 +466,24 @@ if (!isDev && cluster.isMaster) {
 
     let message = {error: null};
 
+    if(parent != null){
+      parent = `'${parent}'`;
+    }
+
     res.set('Content-Type', 'application/json');
 
     validateUser(userID,sessionID)
     .then(
       function(value){
         // Run comment Create        
-        let sql = `CALL proc_comment_create( '${comment}', '${parent}', '${event}', '${userID}')`;
+        let sql = `CALL proc_comment_create( '${comment}', ${parent}, '${event}', '${userID}')`;
        
           conn.query(sql,function(err,results){
             if(err){
               message['error'] = 1;
               message['error_description'] = ERROR_CONN;
-            }else{
-              
+            }else{              
               message['comment'] = results[0];
-              console.log(results);
-              console.log(sql);
             }
             res.send(message); 
           });        
