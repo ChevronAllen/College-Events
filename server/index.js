@@ -479,7 +479,7 @@ if (!isDev && cluster.isMaster) {
               message['error'] = 1;
               message['error_description'] = ERROR_CONN;
             }else{
-              message['test'] = 123;
+              
               message['comment'] = results[0];
               console.log(results);
             }
