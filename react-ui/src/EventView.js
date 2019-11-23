@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import MapContainer from './MapContainer.js';
 import Geocode from "react-geocode";
 import './Events.css';
-import { Form, FormGroup, Row, Col, ListGroup, ListGroupItem } from 'reactstrap';
+import { Form, FormGroup, Label, Input, ListGroup, ListGroupItem, Button } from 'reactstrap';
 
 Geocode.setApiKey("AIzaSyAyKupRQtPiJHfUutD2aeWE1WFdnTBd_Jc");
 
@@ -17,10 +17,12 @@ class EventView extends Component {
       lat: 0,
       lng: 0,
       address: "",
-      comments: []
+      comments: [],
+      commentArea: ""
     }
     this.handleChange = this.handleChange.bind(this);
     this.tryGetComments = this.tryGetComments.bind(this);
+    this.submitComment = this.submitComment.bind(this);
     this.tryLocate = this.tryLocate.bind(this);
     this.state.lat = JSON.parse(this.state.event['eventLocation'])['lat'];
     this.state.lng = JSON.parse(this.state.event['eventLocation'])['lng'];
@@ -40,7 +42,6 @@ class EventView extends Component {
     postBody['eventID'] = this.state.event['eventID'];
     postBody['userID'] = localStorage.getItem('userID');
     postBody['sessionID'] = localStorage.getItem('sessionID');
-    console.log(JSON.stringify(postBody));
 
     fetch("/api/events/" + this.state.event['eventID'] + "/comments", {
       method: 'GET',
@@ -52,9 +53,34 @@ class EventView extends Component {
       .then((response => {
         response.json().then(data => {
           if (data['error'] === null) {
-            this.setState({ comments: data["comments"] }, () => { console.log(this.state.comments) });
+            this.setState({ comments: data["comments"] });
 
           }
+        })
+      })).catch(err => err);
+  }
+
+  submitComment(e) {
+    let postBody = {};
+
+    postBody['comment'] = this.state.commentArea;
+    postBody['event'] = this.state.event['eventID'];
+    postBody['userID'] = localStorage.getItem('userID');
+    postBody['sessionID'] = localStorage.getItem('sessionID');
+    postBody['parent'] = null;
+    console.log(JSON.stringify(postBody));
+
+    fetch("/api/comment/create", {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(postBody)
+    })
+      .then((response => {
+        response.json().then(data => {
+          this.tryGetComments();
         })
       })).catch(err => err);
   }
@@ -73,9 +99,6 @@ class EventView extends Component {
 
   render() {
 
-    console.log(this.state.comments);
-
-
     let comments =
       <ListGroup>{
         this.state.comments.map((item) => {
@@ -85,14 +108,12 @@ class EventView extends Component {
               <h3>{item["createdBy"]}:</h3><p>{item["commentText"]}</p>
               {
                 this.state.comments.map((nestedItem) => {
-                  console.log(nestedItem['replyTo'] + ' ' + currentComment['commentID']);
                   if (nestedItem['replyTo'] === currentComment['commentID']) {
                     currentComment = nestedItem;
                     return <ListGroup>
                       <ListGroupItem className="comment">
                       <h3>{nestedItem["createdBy"]}:</h3><p>{nestedItem["commentText"]}</p>
                         {this.state.comments.map((nestedItem) => {
-                          console.log(nestedItem['replyTo'] + ' ' + currentComment['commentID']);
                           if (nestedItem['replyTo'] === currentComment['commentID']) {
                             currentComment = nestedItem;
                             return <ListGroup>
@@ -123,8 +144,13 @@ class EventView extends Component {
         <div className="events-container">
           <h3 style={{ textAlign: "justify" }}>{this.state.event['eventDescription']}</h3>
         </div>
-        <Form>
-          <FormGroup></FormGroup>
+        <Form className="comment">
+          <FormGroup>
+          <Label for="commentArea">Comment</Label>
+          <Input type="textarea" name="commentArea" id="commentArea" onChange={this.handleChange.bind(this)} />
+          <br/>
+          <Button className="submit-button" onClick={this.submitComment}>Submit</Button>
+          </FormGroup>
         </Form>
         {comments}
       </div>
