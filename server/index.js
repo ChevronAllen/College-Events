@@ -247,7 +247,7 @@ if (!isDev && cluster.isMaster) {
             message['error'] = 1;
             message['error_description'] = ERROR_CONN;
           }else{
-            message['rsoID'] = result[0][0]['rsoID'];
+            message['rsoID'] = result[0];
           }
 
           res.set('Content-Type', 'application/json');
