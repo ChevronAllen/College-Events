@@ -212,6 +212,7 @@ if (!isDev && cluster.isMaster) {
 
 
   });  
+
   app.post('/api/events', function (req, res) {
     
     let message = {error: null};
@@ -258,6 +259,7 @@ if (!isDev && cluster.isMaster) {
     
 
   }); 
+
   app.post('/api/events/:eventID', function(req, res){
     let message = {error: null};
 
@@ -300,6 +302,7 @@ if (!isDev && cluster.isMaster) {
     });        
   }); 
 
+  
   app.post('/api/events/create', function (req, res){
     let message = {error: null};
 
@@ -379,6 +382,7 @@ if (!isDev && cluster.isMaster) {
     });
 
   });
+
   app.post('/api/comment/create', function(req, res){
     let userID = req.body['userID'];
     let sessionID = req.body['sessionID'];
@@ -387,6 +391,8 @@ if (!isDev && cluster.isMaster) {
     let event = req.body['event'];
 
     let message = {error: null};
+
+    res.set('Content-Type', 'application/json');
 
     validateUser(userID,sessionID).then(
       function(value){
@@ -412,17 +418,24 @@ if (!isDev && cluster.isMaster) {
         resolve(message);       
       }
     ).then(function(value){
-        res.set('Content-Type', 'application/json');
         res.send(JSON.stringify(value));
+    })
+    .catch(function(error){
+      message['error'] = 1;
+      message['error_description'] = error; 
+      console.log(message);
+      res.send(message);
     });
 
   });
+
   app.post('/api/comment/update', function(req, res){
     validateUser(userID,sessionID).then(
       function(value){},
       function(value){}
     );
   });
+
   app.post('/api/comment/delete', function(req, res){
     validateUser(userID,sessionID).then(
       function(value){},
