@@ -123,7 +123,101 @@ if (!isDev && cluster.isMaster) {
       res.set('Content-Type', 'application/json');
       res.send(JSON.stringify(message));
     });
+  });
+
+  app.post('/api/rsos', function (req, res) {
+    
+    let message = {error: null};
+
+    let userID = req.body['userID'];
+    let sessionID = req.body['sessionID'];
+    
+    validateUser(userID,sessionID)
+    .then(function(value){
+      // Valid User
+
+      let sql =  `SELECT r2.* FROM rsoMembers r LEFT JOIN rsos r2 ON r.rsoID = r2.rsoID WHERE r.userID = '${userID}'; `;
+
+      conn.query(sql,function(err,results){
+
+        if(err){
+          message['error'] = 1; 
+          message['error_description'] = ERROR_CONN;
+        }else{          
+          message['rsos'] = results;          
+        }
+         
+        res.set('Content-Type', 'application/json');
+        res.send(message);      
+
+      });
+     
+
+    },function(value){
+      // Invalid User
+      message['error'] = 1;
+      message['error_description'] = value;
+
+      res.set('Content-Type', 'application/json');
+      res.send(message);
+    })
+    .catch(function(error){
+      console.log(error);
+      message['error'] = 1;
+      message['error_description'] = error; 
+      console.log(message);
+      res.send(message);
+    });
+    
+
   }); 
+
+  app.post('/api/schools', function (req, res) {
+    
+    let message = {error: null};
+
+    let userID = req.body['userID'];
+    let sessionID = req.body['sessionID'];
+    
+    validateUser(userID,sessionID)
+    .then(function(value){
+      // Valid User
+
+      let sql =  `SELECT s.* FROM userAttendance u LEFT JOIN schools s ON u.schoolID = s.schoolID WHERE u.userID = '${userID}'; `;
+
+      conn.query(sql,function(err,results){
+
+        if(err){
+          message['error'] = 1; 
+          message['error_description'] = ERROR_CONN;
+        }else{          
+          message['rsos'] = results;          
+        }
+         
+        res.set('Content-Type', 'application/json');
+        res.send(message);      
+
+      });
+     
+
+    },function(value){
+      // Invalid User
+      message['error'] = 1;
+      message['error_description'] = value;
+
+      res.set('Content-Type', 'application/json');
+      res.send(message);
+    })
+    .catch(function(error){
+      console.log(error);
+      message['error'] = 1;
+      message['error_description'] = error; 
+      console.log(message);
+      res.send(message);
+    });
+    
+
+  });
 
   app.post('/api/rso/create', function(req, res){
     let message = { error: 0};
