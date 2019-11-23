@@ -338,48 +338,6 @@ if (!isDev && cluster.isMaster) {
 
   }); 
 
-  app.post('/api/events/:eventID', function(req, res){
-    let message = {error: null};
-
-    let eventID = req.params['eventID'];
-    let userID = req.body['userID'];
-    let sessionID = req.body['sessionID'];
-
-    res.set('Content-Type', 'application/json');
-
-    validateUser(userID,sessionID)
-    .then(
-      function(value){
-        let sql = `CALL euwtker4demcwlxt.proc_events_tryGet('${userID}','${eventID}');`;
-
-        conn.query(sql,function(err,results){
-
-          if(err){
-            message['error'] = 1; 
-            message['error_description'] = ERROR_CONN;
-          }else{          
-            message['events'] = results[0];          
-          }          
-          res.send(message);    
-        });
-
-      },
-      function(value){
-          message['error'] = 1;
-          message['error_description'] = ERROR_LOGIN;
-          res.send(message); 
-      }
-    )
-    .catch(function(error){
-      console.log(error);
-      message['error'] = 1;
-      message['error_description'] = error; 
-      console.log(message);
-      res.send(message);
-    });        
-  }); 
-
-  
   app.post('/api/events/create', function (req, res){
     let message = {error: null};
 
@@ -432,6 +390,50 @@ if (!isDev && cluster.isMaster) {
     });      
     
   });
+
+  app.post('/api/events/:eventID', function(req, res){
+    let message = {error: null};
+
+    let eventID = req.params['eventID'];
+    let userID = req.body['userID'];
+    let sessionID = req.body['sessionID'];
+
+    res.set('Content-Type', 'application/json');
+
+    validateUser(userID,sessionID)
+    .then(
+      function(value){
+        let sql = `CALL euwtker4demcwlxt.proc_events_tryGet('${userID}','${eventID}');`;
+
+        conn.query(sql,function(err,results){
+
+          if(err){
+            message['error'] = 1; 
+            message['error_description'] = ERROR_CONN;
+          }else{          
+            message['events'] = results[0];          
+          }          
+          res.send(message);    
+        });
+
+      },
+      function(value){
+          message['error'] = 1;
+          message['error_description'] = ERROR_LOGIN;
+          res.send(message); 
+      }
+    )
+    .catch(function(error){
+      console.log(error);
+      message['error'] = 1;
+      message['error_description'] = error; 
+      console.log(message);
+      res.send(message);
+    });        
+  }); 
+
+  
+  
   
   app.get('/api/events/:eventID/comments', function(req, res){
     let message = {error: null};
