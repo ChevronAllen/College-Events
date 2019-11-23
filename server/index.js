@@ -316,6 +316,8 @@ if (!isDev && cluster.isMaster) {
     .then(function(value){
       // Valid User
 
+      res.set('Content-Type', 'application/json');
+
       let sql =  `CALL euwtker4demcwlxt.proc_events_available( '${userID}' )`;
 
       conn.query(sql,function(err,results){
@@ -327,7 +329,6 @@ if (!isDev && cluster.isMaster) {
           message['events'] = results[0];          
         }
          
-        res.set('Content-Type', 'application/json');
         res.send(message);      
 
       });
@@ -338,7 +339,6 @@ if (!isDev && cluster.isMaster) {
       message['error'] = 1;
       message['error_description'] = value;
 
-      res.set('Content-Type', 'application/json');
       res.send(message);
     })
     .catch(function(error){
@@ -359,7 +359,10 @@ if (!isDev && cluster.isMaster) {
     let userID = req.body['userID'];
     let sessionID = req.body['sessionID'];
 
-    validateUser(userID,sessionID).then(
+    res.set('Content-Type', 'application/json');
+
+    validateUser(userID,sessionID)
+    .then(
       function(value){
         let sql = `CALL euwtker4demcwlxt.proc_events_tryGet('${userID}','${eventID}');`;
 
@@ -371,20 +374,16 @@ if (!isDev && cluster.isMaster) {
           }else{          
             message['events'] = results[0];          
           }          
-          resolve(message);    
+          res.send(message);    
         });
 
       },
       function(value){
           message['error'] = 1;
           message['error_description'] = ERROR_LOGIN;
-          resolve(message);
+          res.send(message); 
       }
     )
-    .then(function(value){
-      res.set('Content-Type', 'application/json');
-      res.send(message);   
-    })
     .catch(function(error){
       console.log(error);
       message['error'] = 1;
@@ -411,7 +410,10 @@ if (!isDev && cluster.isMaster) {
     let userID = req.body['userID'];
     let sessionID = req.body['sessionID'];
 
-    validateUser(userID,sessionID).then(
+    res.set('Content-Type', 'application/json');
+
+    validateUser(userID,sessionID)
+    .then(
       function(value){
         // Run comment Create        
         let sql = `CALL proc_event_create('${isPublic}','${name}','${description}','${startDate}', '${endDate}', '${JSON.stringify(repeats)}','${JSON.stringify(location)}', '${userID}', '${rsoID}', '${schoolID}')`;
@@ -423,7 +425,7 @@ if (!isDev && cluster.isMaster) {
             }else{
               message['events'] = results[0];
             }
-            resolve(message);
+            res.send(message); 
           });        
       },
       function(value){
@@ -432,12 +434,16 @@ if (!isDev && cluster.isMaster) {
         message['error'] = 1
         message['error_description'] = value;
 
-        resolve(message);       
+        res.send(message);        
       }
-    ).then(function(value){
-        res.set('Content-Type', 'application/json');
-        res.send(JSON.stringify(value));
-    });    
+    )
+    .catch(function(error){
+      console.log(error);
+      message['error'] = 1;
+      message['error_description'] = error; 
+      console.log(message);
+      res.send(message);
+    });      
     
   });
   
@@ -486,7 +492,8 @@ if (!isDev && cluster.isMaster) {
 
     res.set('Content-Type', 'application/json');
 
-    validateUser(userID,sessionID).then(
+    validateUser(userID,sessionID)
+    .then(
       function(value){
         // Run comment Create        
         let sql = `CALL proc_comment_create( '${comment}', '${parent}', '${event}', '${userID}')`;
@@ -498,7 +505,7 @@ if (!isDev && cluster.isMaster) {
             }else{
               message['comment'] = results[0];
             }
-            resolve(message);
+            res.send(message); 
           });        
       },
       function(value){
@@ -507,11 +514,9 @@ if (!isDev && cluster.isMaster) {
         message['error'] = 1
         message['error_description'] = value;
 
-        resolve(message);       
+        res.send(message);       
       }
-    ).then(function(value){
-        res.send(JSON.stringify(value));
-    })
+    )
     .catch(function(error){
       message['error'] = 1;
       message['error_description'] = error; 
