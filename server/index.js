@@ -453,31 +453,20 @@ if (!isDev && cluster.isMaster) {
 
     res.set('Content-Type', 'application/json');
     
-    new Promise(()=>{
-      let sql = `SELECT * FROM comments WHERE eventID = '${eventID}';`;
+    let sql = `SELECT * FROM comments WHERE eventID = '${eventID}';`;
 
-      conn.query(sql,function(err,results){
+    conn.query(sql,function(err,results){
 
-        if(err){
-          message['error'] = 1; 
-          message['error_description'] = ERROR_CONN;
-        }else{          
-          message['comments'] = results;          
-        }
-         
-        resolve(message);    
-
-      });
-
-    }).then(function(value){           
-      res.send(value);
-    })
-    .catch(function(error){
-      message['error'] = 1;
-      message['error_description'] = error; 
-      console.log(message);
+      if(err){
+        message['error'] = 1; 
+        message['error_description'] = ERROR_CONN;
+      }else{          
+        message['comments'] = results;          
+      }        
+        
       res.send(message);
-    });
+
+    });       
 
   });
 
@@ -526,19 +515,91 @@ if (!isDev && cluster.isMaster) {
 
   });
 
-  app.post('/api/comment/update', function(req, res){
-    validateUser(userID,sessionID).then(
-      function(value){},
-      function(value){}
-    );
+  app.post('/api/comment/edit', function(req, res){
+    let userID = req.body['userID'];
+    let sessionID = req.body['sessionID'];
+    let commentID = req.body['commentID'];
+    let comment = req.body['comment'];
+    
+    let message = {error: null};
+
+    res.set('Content-Type', 'application/json');
+
+    validateUser(userID,sessionID)
+    .then(
+      function(value){
+        // Run comment Create        
+        let sql = `CALL proc_comment_edit( '${comment}', '${commentID}', '${userID}')`;
+       
+          conn.query(sql,function(err,results){
+            if(err){
+              message['error'] = 1;
+              message['error_description'] = ERROR_CONN;
+            }else{
+              message['comment'] = results[0];
+            }
+            res.send(message); 
+          });        
+      },
+      function(value){
+        // send credential error
+
+        message['error'] = 1
+        message['error_description'] = value;
+
+        res.send(message);       
+      }
+    )
+    .catch(function(error){
+      message['error'] = 1;
+      message['error_description'] = error; 
+      console.log(message);
+      res.send(message);
+    });
   });
 
   app.post('/api/comment/delete', function(req, res){
-    validateUser(userID,sessionID).then(
-      function(value){},
-      function(value){}
-    );
+    let userID = req.body['userID'];
+    let sessionID = req.body['sessionID'];
+    let commentID = req.body['commentID'];
+    
+    let message = {error: null};
+
+    res.set('Content-Type', 'application/json');
+
+    validateUser(userID,sessionID)
+    .then(
+      function(value){
+        // Run comment Create        
+        let sql = `CALL proc_comment_delete( '${commentID}', '${userID}')`;
+       
+          conn.query(sql,function(err,results){
+            if(err){
+              message['error'] = 1;
+              message['error_description'] = ERROR_CONN;
+            }else{
+              message['comment'] = results[0];
+            }
+            res.send(message); 
+          });        
+      },
+      function(value){
+        // send credential error
+
+        message['error'] = 1
+        message['error_description'] = value;
+
+        res.send(message);       
+      }
+    )
+    .catch(function(error){
+      message['error'] = 1;
+      message['error_description'] = error; 
+      console.log(message);
+      res.send(message);
+    });
   });
+  
 
   //  Register a new User Account
   app.post('/api/register', function (req, res) {
