@@ -453,7 +453,7 @@ if (!isDev && cluster.isMaster) {
 
     res.set('Content-Type', 'application/json');
     
-    let sql = `SELECT * FROM comments WHERE eventID = '${eventID}';`;
+    let sql = `CALL proc_comments_get('${eventID}');`;
 
     conn.query(sql,function(err,results){
 
@@ -461,7 +461,7 @@ if (!isDev && cluster.isMaster) {
         message['error'] = 1; 
         message['error_description'] = ERROR_CONN;
       }else{          
-        message['comments'] = results;          
+        message['comments'] = results[0];          
       }        
         
       res.send(message);
