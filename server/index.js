@@ -383,14 +383,14 @@ if (!isDev && cluster.isMaster) {
   app.post('/api/events/create', function (req, res){
     let message = {error: null};
 
-    let isPublic = req.body['private'] | true;
+    let isPublic = !req.body['private'] | true;
     let name = req.body['nameEvent'] ;
     let description = req.body['descriptionEvent'] ;
-    let startDate = '2019-11-10' ; //req.body['startDate'] | 
-    let endDate =  '2019-12-25' ;//req.body['endDate'] 
-    let repeats = {}; // req.body['repeat'] | 
-    let location = {};// req.body['location'] | 
-    let rsoID = ( req.body['rsoID'] == null) ?  'eb843f8c-0aea-11ea-a27d-0649c169819a' : req.body['rsoID'];
+    let startDate = req.body['startDate'] ;
+    let endDate =  req.body['endDate'] ;
+    let repeats = {}; // req.body['repeat']
+    let location =  req.body['location'] ; 
+    let rsoID    = (req.body['rsoID'] == null) ?  'eb843f8c-0aea-11ea-a27d-0649c169819a' : req.body['rsoID'];
     let schoolID = (req.body['schoolID'] == null ) ? 'f7858ec0-0a6d-11ea-a27d-0649c169819a' : req.body['schoolID'];
     
     let userID = req.body['userID'];
@@ -403,22 +403,22 @@ if (!isDev && cluster.isMaster) {
       function(value){
         // Run comment Create        
         let sql = `CALL proc_event_create('${isPublic}','${name}','${description}','${startDate}', '${endDate}', '${JSON.stringify(repeats)}','${JSON.stringify(location)}', '${userID}', '${rsoID}', '${schoolID}')`;
-       
-          conn.query(sql,function(err,results){
-            if(err){
-              message['error'] = 1;
-              message['error_description'] = ERROR_CONN;
-            }else{
-              message['events'] = results[0];
-            }
-            res.send(message); 
-          });        
+        console.log(sql);
+        conn.query(sql,function(err,results){
+          if(err){
+            message['error'] = 1;
+            message['error_description'] = ERROR_CONN;
+          }else{
+            message['events'] = results[0];
+          }
+          console.log(results);
+          res.send(message); 
+        });        
       },
       function(value){
         // send credential error
-
         message['error'] = 1
-        message['error_description'] = value;
+        message['error_description'] = ERROR_LOGIN;
 
         res.send(message);        
       }
