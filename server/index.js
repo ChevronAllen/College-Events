@@ -271,10 +271,11 @@ if (!isDev && cluster.isMaster) {
 
   app.get('/api/events', function(req, res){
     let message = {error: null};
-       
-    new Promise(()=>{
+      
+    res.set('Content-Type', 'application/json');
+    
       let sql = `SELECT * FROM view_events_public;`;
-
+      res.set('Content-Type', 'application/json');
       conn.query(sql,function(err,results){
 
         if(err){
@@ -284,23 +285,9 @@ if (!isDev && cluster.isMaster) {
           message['events'] = results;          
         }
          
-        resolve(message);    
+        res.send(message);    
 
       });
-
-    },function(value){      
-
-      res.set('Content-Type', 'application/json');
-      res.send(message);      
-
-    })
-    .catch(function(error){
-      console.log(error);
-      message['error'] = 1;
-      message['error_description'] = error; 
-      console.log(message);
-      res.send(message);
-    });
 
 
   });  
@@ -492,6 +479,7 @@ if (!isDev && cluster.isMaster) {
               message['error'] = 1;
               message['error_description'] = ERROR_CONN;
             }else{
+              message['test'] = 123;
               message['comment'] = results[0];
             }
             res.send(message); 
