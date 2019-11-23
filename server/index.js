@@ -264,28 +264,32 @@ if (!isDev && cluster.isMaster) {
     let eventID = req.params['eventID'];
     let userID = req.body['userID'];
     let sessionID = req.body['sessionID'];
-    
-    new Promise(()=>{
-      let sql = `SELECT 'test'`;
 
-      conn.query(sql,function(err,results){
+    validateUser(userID,sessionID).then(
+      function(value){
+        let sql = `CALL euwtker4demcwlxt.proc_events_tryGet('${userID}','${eventID}');`;
 
-        if(err){
-          message['error'] = 1; 
-          message['error_description'] = ERROR_CONN;
-        }else{          
-          message['events'] = results;          
-        }
-         
-        resolve(message);    
+        conn.query(sql,function(err,results){
 
-      });
+          if(err){
+            message['error'] = 1; 
+            message['error_description'] = ERROR_CONN;
+          }else{          
+            message['events'] = results[0];          
+          }          
+          resolve(message);    
+        });
 
-    },function(value){      
-
+      },
+      function(value){
+          message['error'] = 1;
+          message['error_description'] = ERROR_LOGIN;
+          resolve(message);
+      }
+    )
+    .then(function(value){
       res.set('Content-Type', 'application/json');
-      res.send(message);      
-
+      res.send(message);   
     })
     .catch(function(error){
       console.log(error);
@@ -293,10 +297,9 @@ if (!isDev && cluster.isMaster) {
       message['error_description'] = error; 
       console.log(message);
       res.send(message);
-    });
-
-
+    });        
   }); 
+
   app.post('/api/events/create', function (req, res){
     let message = {error: null};
 
@@ -346,6 +349,8 @@ if (!isDev && cluster.isMaster) {
   app.get('/api/events/:eventID/comments', function(req, res){
     let message = {error: null};
     let eventID = req.params['eventID'];
+
+    res.set('Content-Type', 'application/json');
     
     new Promise(()=>{
       let sql = `SELECT * FROM comments WHERE eventID = '${eventID}';`;
@@ -356,21 +361,17 @@ if (!isDev && cluster.isMaster) {
           message['error'] = 1; 
           message['error_description'] = ERROR_CONN;
         }else{          
-          message['events'] = results;          
+          message['comments'] = results;          
         }
          
         resolve(message);    
 
       });
 
-    },function(value){      
-
-      res.set('Content-Type', 'application/json');
-      res.send(message);      
-
+    }).then(function(value){           
+      res.send(value);
     })
     .catch(function(error){
-      console.log(error);
       message['error'] = 1;
       message['error_description'] = error; 
       console.log(message);
