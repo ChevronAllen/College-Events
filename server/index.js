@@ -229,42 +229,39 @@ if (!isDev && cluster.isMaster) {
     
     let sql = `SELECT fn_session_valid('${userID}', '${sessionID}') AS 'valid';`;
 
-    conn.query(sql,function(err,result){
-      console.log('validating user');
-      if(err){
-        message['error'] = 1;
-        message['error_description'] = ERROR_CONN;
-        res.set('Content-Type', 'application/json');
+    validateUser(userID,sessionID)
+    .then(function(value){
+      // Valid User
+
+      res.set('Content-Type', 'application/json');
+
+      sql = `CALL euwtker4demcwlxt.proc_rso_create( '${rsoName}', '${rsoDesc}', '${userID}', 'f7858ec0-0a6d-11ea-a27d-0649c169819a' );`;
+
+      conn.query(sql, function(err, result){
+        if(err){
+          message['error'] = 1;
+          message['error_description'] = ERROR_CONN;
+        }else{
+          message['rsoID'] = result[0];
+        }
+        
         res.send(JSON.stringify(message));
 
-      }else if(result[0]['valid'] = '1') {
-        console.log('valid user');
+      });     
 
-        sql = `CALL euwtker4demcwlxt.proc_rso_create( '${rsoName}', '${rsoDesc}', '${userID}', 'f7858ec0-0a6d-11ea-a27d-0649c169819a' );`;
+    },function(value){
+      // Invalid User
+      message['error'] = 1;
+      message['error_description'] = ERROR_LOGIN;
 
-        conn.query(sql, function(err, result){
-          if(err){
-            message['error'] = 1;
-            message['error_description'] = ERROR_CONN;
-          }else{
-            message['rsoID'] = result[0];
-          }
-
-          res.set('Content-Type', 'application/json');
-          res.send(JSON.stringify(message));
-
-        });
-
-      }else{
-        console.log('invalid user');
-
-        res.set('Content-Type', 'application/json');
-        res.send(JSON.stringify(message));
-      }
-
-            
-      
-
+      res.send(message);
+    })
+    .catch(function(error){
+      console.log(error);
+      message['error'] = 1;
+      message['error_description'] = error; 
+      console.log(message);
+      res.send(message);
     });
 
   });
@@ -274,20 +271,20 @@ if (!isDev && cluster.isMaster) {
       
     res.set('Content-Type', 'application/json');
     
-      let sql = `SELECT * FROM view_events_public;`;
-      res.set('Content-Type', 'application/json');
-      conn.query(sql,function(err,results){
+    let sql = `SELECT * FROM view_events_public;`;
+    
+    conn.query(sql,function(err,results){
 
-        if(err){
-          message['error'] = 1; 
-          message['error_description'] = ERROR_CONN;
-        }else{          
-          message['events'] = results;          
-        }
-         
-        res.send(message);    
+      if(err){
+        message['error'] = 1; 
+        message['error_description'] = ERROR_CONN;
+      }else{          
+        message['events'] = results;          
+      }
+        
+      res.send(message);    
 
-      });
+    });
 
 
   });  
