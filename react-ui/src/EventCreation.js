@@ -219,7 +219,7 @@ class EventCreation extends Component {
         <Label for="hostRSO">RSO Host</Label>
         <Input type="select" name="hostRSO" id="hostRSO" onChange={this.handleChange.bind(this)} >
           <option></option>
-          <option>Temp RSO</option>
+          <option>Rock Club</option>
         </Input>
       </FormGroup>
       <FormGroup check>
