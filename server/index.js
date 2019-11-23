@@ -224,8 +224,8 @@ if (!isDev && cluster.isMaster) {
     let rsoName = req.body['nameRSO'];
     let rsoDesc = req.body['descriptionRSO'];
 
-    let userID = req.session['userID'];
-    let sessionID = req.session['sessionID'];
+    let userID = req.body['userID'];
+    let sessionID = req.body['sessionID'];
     
     let sql = `SELECT fn_session_valid('${userID}', '${sessionID}') AS 'valid';`;
 
