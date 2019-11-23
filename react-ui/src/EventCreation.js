@@ -76,10 +76,11 @@ class EventCreation extends Component {
     Geocode.fromAddress(this.state.address + ' ' + this.state.city + ' ' + this.state.state).then(
       response => {
         const { lat, lng } = response.results[0].geometry.location;
-        console.log(lat, lng);
+
         location['lat'] = lat;
         location['lng'] = lng;
-        console.log(location);
+
+
         postBody['userID']= localStorage.getItem('userID');
         postBody['sessionID']= localStorage.getItem('sessionID');
         postBody['nameEvent']= this.state.nameEvent;
@@ -90,8 +91,7 @@ class EventCreation extends Component {
         postBody['endDate']= de;
         postBody['hostRSO']= this.state.hostRSO;
         postBody['private']= this.state.private;
-        postBody['repeat']= this.state.repeat;
-        console.log(JSON.stringify(postBody));
+        postBody['repeat']= "";
 
         fetch("/api/events/create", {
           method: 'POST',
@@ -227,15 +227,6 @@ class EventCreation extends Component {
           <Input type="checkbox" id='private' checked={this.state.private} onChange={this.checkPrivacy.bind(this)}/>{' '}
           Private
         </Label>
-      </FormGroup>
-      <FormGroup>
-        <Label for="repeat">Repeat Event</Label>
-        <Input type="select" name="repeat" id="repeat" onChange={this.handleChange.bind(this)} >
-          <option>Never</option>
-          <option>Weekly</option>
-          <option>Monthly</option>
-          <option>Yearly</option>
-        </Input>
       </FormGroup>
       <FormGroup>
         <Label for="descriptionEvent">Event Description</Label>

@@ -8,7 +8,7 @@ function LandingPage() {
     <div className="container">
       <h1>Plan Events, Together.</h1>
       <h3>Find Events, Host Events, Attend Your Choice <br /> Look for Events Near You</h3>
-      <MapContainer />
+      <MapContainer  lat={"28.602427"} lng={"-81.20006"}/>
     </div>
   );
 }

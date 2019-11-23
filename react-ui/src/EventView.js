@@ -1,8 +1,7 @@
 import React, {Component} from 'react';
-import PropTypes from 'prop-types';
+import MapContainer from './MapContainer.js';
 import Geocode from "react-geocode";
 import './Events.css';
-import MapContainer from './MapContainer.js';
 import { Card, Button, CardTitle, CardText, Row, Col } from 'reactstrap';
 
 Geocode.setApiKey("AIzaSyAyKupRQtPiJHfUutD2aeWE1WFdnTBd_Jc");
@@ -12,12 +11,18 @@ class EventView extends Component {
     super(props);
 
     this.state = {
-      event: JSON.parse(localStorage.getItem('currentEvent'))
+      event: JSON.parse(localStorage.getItem('currentEvent')),
+      lat: 0,
+      lng: 0,
+      address: ""
     }
     this.handleChange = this.handleChange.bind(this);
-    this.tryRSOCreate = this.tryRSOCreate.bind(this);
+    this.tryGetComments = this.tryGetComments.bind(this);
     this.tryLocate = this.tryLocate.bind(this);
-    console.log(this.state.event);
+    this.state.lat = JSON.parse(this.state.event['eventLocation'])['lat'];
+    this.state.lng = JSON.parse(this.state.event['eventLocation'])['lng'];
+    this.tryGetComments();
+    this.tryLocate();
   }
 
   handleChange = event => {
@@ -26,12 +31,12 @@ class EventView extends Component {
     });
   }
 
-  tryRSOCreate(e){    
+  tryGetComments(e){    
     let postBody = {};   
     
-    postBody['nameRSO']= this.state.nameRSO;
-    postBody['descriptionRSO']= this.state.descriptionRSO;
-    postBody['userID']= this.state.userID;
+    postBody['eventID']= this.state.event['eventID'];
+    postBody['userID']= localStorage.getItem('userID');
+    postBody['sessionID']= localStorage.getItem('sessionID');
     console.log(JSON.stringify(postBody));
     
     /*
@@ -43,15 +48,20 @@ class EventView extends Component {
       },
       body: JSON.stringify(postBody)
     })
-    .then(  (response)=>{
-        console.log('success');
-    }).catch(err => err);
+    .then((response => {
+      response.json().then(data =>{
+        if(data['error'] === null)
+        {
+            console.log(data);
+        }
+      })
+    })).catch(err => err);
     */
   }
 
   tryLocate(e){    
 
-    Geocode.fromLatLng(this.state.event.lat, this.state.event.lng).then(
+    Geocode.fromLatLng(this.state.lat, this.state.lng).then(
       response => {
         this.setState({address:response.results[0].formatted_address});
       },
@@ -70,8 +80,11 @@ class EventView extends Component {
     return (
     <div className="eventView events-container">
       <h1>{this.state.event['eventName']}</h1>
-      <br />
-      <h3>{this.state.event['eventDescription']}</h3>
+      <h2>{this.state.address}</h2>
+      <center><MapContainer  lat={this.state.lat} lng={this.state.lng}/></center>
+      <div className="events-container">
+      <h3 style={{textAlign: "justify"}}>{this.state.event['eventDescription']}</h3>
+      </div>
     </div>
   );
 }
