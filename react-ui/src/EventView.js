@@ -39,14 +39,12 @@ class EventView extends Component {
     postBody['sessionID']= localStorage.getItem('sessionID');
     console.log(JSON.stringify(postBody));
     
-    /*
-    fetch("/api/", {
-      method: 'POST',
+    fetch("/api/events/"+this.state.event['eventID']+"/comments", {
+      method: 'GET',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(postBody)
     })
     .then((response => {
       response.json().then(data =>{
@@ -56,7 +54,6 @@ class EventView extends Component {
         }
       })
     })).catch(err => err);
-    */
   }
 
   tryLocate(e){    
@@ -69,10 +66,6 @@ class EventView extends Component {
         console.error(error);
       }
     );
-  }
-
-  componentDidMount(){
-    console.log(localStorage.getItem('userID'));
   }
 
   render() {
