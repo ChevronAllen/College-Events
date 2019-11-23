@@ -482,6 +482,7 @@ if (!isDev && cluster.isMaster) {
               
               message['comment'] = results[0];
               console.log(results);
+              console.log(sql);
             }
             res.send(message); 
           });        
