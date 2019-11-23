@@ -481,6 +481,7 @@ if (!isDev && cluster.isMaster) {
             }else{
               message['test'] = 123;
               message['comment'] = results[0];
+              console.log(results);
             }
             res.send(message); 
           });        
