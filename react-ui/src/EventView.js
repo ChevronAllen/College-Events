@@ -1,15 +1,13 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
+import Geocode from "react-geocode";
 import './Events.css';
 import MapContainer from './MapContainer.js';
 import { Card, Button, CardTitle, CardText, Row, Col } from 'reactstrap';
 
-class EventView extends Component {
-  
-  static propTypes = {
-    event: PropTypes.object.isRequired,
-  };
+Geocode.setApiKey("AIzaSyAyKupRQtPiJHfUutD2aeWE1WFdnTBd_Jc");
 
+class EventView extends Component {
   constructor(props) {
     super(props);
 
@@ -18,6 +16,7 @@ class EventView extends Component {
     }
     this.handleChange = this.handleChange.bind(this);
     this.tryRSOCreate = this.tryRSOCreate.bind(this);
+    this.tryLocate = this.tryLocate.bind(this);
     console.log(this.state.event);
   }
 
@@ -48,6 +47,18 @@ class EventView extends Component {
         console.log('success');
     }).catch(err => err);
     */
+  }
+
+  tryLocate(e){    
+
+    Geocode.fromLatLng(this.state.event.lat, this.state.event.lng).then(
+      response => {
+        this.setState({address:response.results[0].formatted_address});
+      },
+      error => {
+        console.error(error);
+      }
+    );
   }
 
   componentDidMount(){
