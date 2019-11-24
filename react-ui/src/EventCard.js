@@ -63,7 +63,7 @@ class EventCard extends Component {
 
   render() {
     var ds = new Date(this.state.event['eventDateStart']);
-    var de = new Date(this.state.event['eventDateStart']);
+    var de = new Date(this.state.event['eventDateEnd']);
     return (
     <div className="eventCard" style={{textAlign: "center"}}>
 
