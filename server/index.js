@@ -224,75 +224,39 @@ if (!isDev && cluster.isMaster) {
     let rsoName = req.body['nameRSO'];
     let rsoDesc = req.body['descriptionRSO'];
 
-    let userID = req.session['userID'];
-    let sessionID = req.session['sessionID'];
+    let userID = req.body['userID'];
+    let sessionID = req.body['sessionID'];
     
     let sql = `SELECT fn_session_valid('${userID}', '${sessionID}') AS 'valid';`;
 
-    conn.query(sql,function(err,result){
-      console.log('validating user');
-      if(err){
-        message['error'] = 1;
-        message['error_description'] = ERROR_CONN;
-        res.set('Content-Type', 'application/json');
-        res.send(JSON.stringify(message));
+    console.log(req.body);
 
-      }else if(result[0]['valid'] = '1') {
-        console.log('valid user');
-
-        sql = `CALL euwtker4demcwlxt.proc_rso_create( '${rsoName}', '${rsoDesc}', '${userID}', 'f7858ec0-0a6d-11ea-a27d-0649c169819a' );`;
-
-        conn.query(sql, function(err, result){
-          if(err){
-            message['error'] = 1;
-            message['error_description'] = ERROR_CONN;
-          }else{
-            message['rsoID'] = result[0][0]['rsoID'];
-          }
-
-          res.set('Content-Type', 'application/json');
-          res.send(JSON.stringify(message));
-
-        });
-
-      }else{
-        console.log('invalid user');
-
-        res.set('Content-Type', 'application/json');
-        res.send(JSON.stringify(message));
-      }
-
-            
-      
-
-    });
-
-  });
-
-  app.get('/api/events', function(req, res){
-    let message = {error: null};
-       
-    new Promise(()=>{
-      let sql = `SELECT * FROM view_events_public;`;
-
-      conn.query(sql,function(err,results){
-
-        if(err){
-          message['error'] = 1; 
-          message['error_description'] = ERROR_CONN;
-        }else{          
-          message['events'] = results;          
-        }
-         
-        resolve(message);    
-
-      });
-
-    },function(value){      
+    validateUser(userID,sessionID)
+    .then(function(value){
+      // Valid User
 
       res.set('Content-Type', 'application/json');
-      res.send(message);      
 
+      sql = `CALL euwtker4demcwlxt.proc_rso_create( '${rsoName}', '${rsoDesc}', '${userID}', 'f7858ec0-0a6d-11ea-a27d-0649c169819a' );`;
+
+      conn.query(sql, function(err, result){
+        if(err){
+          message['error'] = 1;
+          message['error_description'] = ERROR_CONN;
+        }else{
+          message['rsoID'] = result[0];
+        }
+        
+        res.send(JSON.stringify(message));
+
+      });     
+
+    },function(value){
+      // Invalid User
+      message['error'] = 1;
+      message['error_description'] = ERROR_LOGIN;
+
+      res.send(message);
     })
     .catch(function(error){
       console.log(error);
@@ -300,6 +264,28 @@ if (!isDev && cluster.isMaster) {
       message['error_description'] = error; 
       console.log(message);
       res.send(message);
+    });
+
+  });
+
+  app.get('/api/events', function(req, res){
+    let message = {error: null};
+      
+    res.set('Content-Type', 'application/json');
+    
+    let sql = `SELECT * FROM view_events_public;`;
+    
+    conn.query(sql,function(err,results){
+
+      if(err){
+        message['error'] = 1; 
+        message['error_description'] = ERROR_CONN;
+      }else{          
+        message['events'] = results;          
+      }
+        
+      res.send(message);    
+
     });
 
 
@@ -352,6 +338,63 @@ if (!isDev && cluster.isMaster) {
 
   }); 
 
+  app.post('/api/events/create', function (req, res){
+    let message = {error: null};
+
+    let isPublic = !req.body['private'] | true;
+    let name = req.body['nameEvent'] ;
+    let description = req.body['descriptionEvent'] ;
+    let startDate = req.body['startDate'] ;
+    let endDate =  req.body['endDate'] ;
+    let repeats = {}; // req.body['repeat']
+    let location =  req.body['location'] ; 
+    let rsoID    = (req.body['rsoID'] == null) ?  'dea3d9c0-0e48-11ea-a27d-0649c169819a' : req.body['rsoID'];
+    let schoolID = (req.body['schoolID'] == null ) ? 'f7858ec0-0a6d-11ea-a27d-0649c169819a' : req.body['schoolID'];
+    
+    let userID = req.body['userID'];
+    let sessionID = req.body['sessionID'];
+
+    if(rsoID != null){
+      rsoID = `'${rsoID}'`;
+    }
+
+    res.set('Content-Type', 'application/json');
+
+    validateUser(userID,sessionID)
+    .then(
+      function(value){
+        // Run comment Create        
+        let sql = `CALL proc_event_create('${isPublic}','${name}','${description}','${startDate}', '${endDate}', '${JSON.stringify(repeats)}','${JSON.stringify(location)}', '${userID}', ${rsoID}, '${schoolID}')`;
+        
+        conn.query(sql,function(err,results){
+          if(err){
+            message['error'] = 1;
+            message['error_description'] = ERROR_CONN;
+          }else{
+            message['events'] = results[0];
+          }
+          
+          res.send(message); 
+        });        
+      },
+      function(value){
+        // send credential error
+        message['error'] = 1
+        message['error_description'] = ERROR_LOGIN;
+
+        res.send(message);        
+      }
+    )
+    .catch(function(error){
+      console.log(error);
+      message['error'] = 1;
+      message['error_description'] = error; 
+      console.log(message);
+      res.send(message);
+    });      
+    
+  });
+
   app.post('/api/events/:eventID', function(req, res){
     let message = {error: null};
 
@@ -394,58 +437,7 @@ if (!isDev && cluster.isMaster) {
   }); 
 
   
-  app.post('/api/events/create', function (req, res){
-    let message = {error: null};
-
-    let isPublic = req.body['private'] | true;
-    let name = req.body['nameEvent'] ;
-    let description = req.body['descriptionEvent'] ;
-    let startDate = '2019-11-10' ; //req.body['startDate'] | 
-    let endDate =  '2019-12-25' ;//req.body['endDate'] 
-    let repeats = {}; // req.body['repeat'] | 
-    let location = {};// req.body['location'] | 
-    let rsoID = ( req.body['rsoID'] == null) ?  'eb843f8c-0aea-11ea-a27d-0649c169819a' : req.body['rsoID'];
-    let schoolID = (req.body['schoolID'] == null ) ? 'f7858ec0-0a6d-11ea-a27d-0649c169819a' : req.body['schoolID'];
-    
-    let userID = req.body['userID'];
-    let sessionID = req.body['sessionID'];
-
-    res.set('Content-Type', 'application/json');
-
-    validateUser(userID,sessionID)
-    .then(
-      function(value){
-        // Run comment Create        
-        let sql = `CALL proc_event_create('${isPublic}','${name}','${description}','${startDate}', '${endDate}', '${JSON.stringify(repeats)}','${JSON.stringify(location)}', '${userID}', '${rsoID}', '${schoolID}')`;
-       
-          conn.query(sql,function(err,results){
-            if(err){
-              message['error'] = 1;
-              message['error_description'] = ERROR_CONN;
-            }else{
-              message['events'] = results[0];
-            }
-            res.send(message); 
-          });        
-      },
-      function(value){
-        // send credential error
-
-        message['error'] = 1
-        message['error_description'] = value;
-
-        res.send(message);        
-      }
-    )
-    .catch(function(error){
-      console.log(error);
-      message['error'] = 1;
-      message['error_description'] = error; 
-      console.log(message);
-      res.send(message);
-    });      
-    
-  });
+  
   
   app.get('/api/events/:eventID/comments', function(req, res){
     let message = {error: null};
@@ -453,31 +445,20 @@ if (!isDev && cluster.isMaster) {
 
     res.set('Content-Type', 'application/json');
     
-    new Promise(()=>{
-      let sql = `SELECT * FROM comments WHERE eventID = '${eventID}';`;
+    let sql = `CALL proc_comments_get('${eventID}');`;
 
-      conn.query(sql,function(err,results){
+    conn.query(sql,function(err,results){
 
-        if(err){
-          message['error'] = 1; 
-          message['error_description'] = ERROR_CONN;
-        }else{          
-          message['comments'] = results;          
-        }
-         
-        resolve(message);    
-
-      });
-
-    }).then(function(value){           
-      res.send(value);
-    })
-    .catch(function(error){
-      message['error'] = 1;
-      message['error_description'] = error; 
-      console.log(message);
+      if(err){
+        message['error'] = 1; 
+        message['error_description'] = ERROR_CONN;
+      }else{          
+        message['comments'] = results[0];          
+      }        
+        
       res.send(message);
-    });
+
+    });       
 
   });
 
@@ -490,13 +471,61 @@ if (!isDev && cluster.isMaster) {
 
     let message = {error: null};
 
+    if(parent != null){
+      parent = `'${parent}'`;
+    }
+
     res.set('Content-Type', 'application/json');
 
     validateUser(userID,sessionID)
     .then(
       function(value){
         // Run comment Create        
-        let sql = `CALL proc_comment_create( '${comment}', '${parent}', '${event}', '${userID}')`;
+        let sql = `CALL proc_comment_create( '${comment}', ${parent}, '${event}', '${userID}')`;
+       
+          conn.query(sql,function(err,results){
+            if(err){
+              message['error'] = 1;
+              message['error_description'] = ERROR_CONN;
+            }else{              
+              message['comment'] = results[0];
+            }
+            res.send(message); 
+          });        
+      },
+      function(value){
+        // send credential error
+
+        message['error'] = 1
+        message['error_description'] = value;
+
+        res.send(message);       
+      }
+    )
+    .catch(function(error){
+      message['error'] = 1;
+      message['error_description'] = error; 
+      console.log(message);
+      res.send(message);
+    });
+
+  });
+
+  app.post('/api/comment/edit', function(req, res){
+    let userID = req.body['userID'];
+    let sessionID = req.body['sessionID'];
+    let commentID = req.body['commentID'];
+    let comment = req.body['comment'];
+    
+    let message = {error: null};
+
+    res.set('Content-Type', 'application/json');
+
+    validateUser(userID,sessionID)
+    .then(
+      function(value){
+        // Run comment Create        
+        let sql = `CALL proc_comment_edit( '${comment}', '${commentID}', '${userID}')`;
        
           conn.query(sql,function(err,results){
             if(err){
@@ -523,22 +552,50 @@ if (!isDev && cluster.isMaster) {
       console.log(message);
       res.send(message);
     });
-
-  });
-
-  app.post('/api/comment/update', function(req, res){
-    validateUser(userID,sessionID).then(
-      function(value){},
-      function(value){}
-    );
   });
 
   app.post('/api/comment/delete', function(req, res){
-    validateUser(userID,sessionID).then(
-      function(value){},
-      function(value){}
-    );
+    let userID = req.body['userID'];
+    let sessionID = req.body['sessionID'];
+    let commentID = req.body['commentID'];
+    
+    let message = {error: null};
+
+    res.set('Content-Type', 'application/json');
+
+    validateUser(userID,sessionID)
+    .then(
+      function(value){
+        // Run comment Create        
+        let sql = `CALL proc_comment_delete( '${commentID}', '${userID}')`;
+       
+          conn.query(sql,function(err,results){
+            if(err){
+              message['error'] = 1;
+              message['error_description'] = ERROR_CONN;
+            }else{
+              message['comment'] = results[0];
+            }
+            res.send(message); 
+          });        
+      },
+      function(value){
+        // send credential error
+
+        message['error'] = 1
+        message['error_description'] = value;
+
+        res.send(message);       
+      }
+    )
+    .catch(function(error){
+      message['error'] = 1;
+      message['error_description'] = error; 
+      console.log(message);
+      res.send(message);
+    });
   });
+  
 
   //  Register a new User Account
   app.post('/api/register', function (req, res) {

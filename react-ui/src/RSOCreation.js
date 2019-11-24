@@ -28,7 +28,8 @@ class RSOCreation extends Component {
     
     postBody['nameRSO']= this.state.nameRSO;
     postBody['descriptionRSO']= this.state.descriptionRSO;
-    postBody['userID']= this.state.userID;
+    postBody['userID'] = localStorage.getItem('userID');
+    postBody['sessionID'] = localStorage.getItem('sessionID');
     
     console.log(JSON.stringify(postBody)); 
     
