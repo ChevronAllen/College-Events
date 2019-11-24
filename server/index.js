@@ -348,11 +348,15 @@ if (!isDev && cluster.isMaster) {
     let endDate =  req.body['endDate'] ;
     let repeats = {}; // req.body['repeat']
     let location =  req.body['location'] ; 
-    let rsoID    = (req.body['rsoID'] == null) ?  'eb843f8c-0aea-11ea-a27d-0649c169819a' : req.body['rsoID'];
+    let rsoID    = (req.body['rsoID'] == null) ?  'dea3d9c0-0e48-11ea-a27d-0649c169819a' : req.body['rsoID'];
     let schoolID = (req.body['schoolID'] == null ) ? 'f7858ec0-0a6d-11ea-a27d-0649c169819a' : req.body['schoolID'];
     
     let userID = req.body['userID'];
     let sessionID = req.body['sessionID'];
+
+    if(rsoID != null){
+      rsoID = `'${rsoID}'`;
+    }
 
     res.set('Content-Type', 'application/json');
 
@@ -360,8 +364,8 @@ if (!isDev && cluster.isMaster) {
     .then(
       function(value){
         // Run comment Create        
-        let sql = `CALL proc_event_create('${isPublic}','${name}','${description}','${startDate}', '${endDate}', '${JSON.stringify(repeats)}','${JSON.stringify(location)}', '${userID}', '${rsoID}', '${schoolID}')`;
-        console.log(sql);
+        let sql = `CALL proc_event_create('${isPublic}','${name}','${description}','${startDate}', '${endDate}', '${JSON.stringify(repeats)}','${JSON.stringify(location)}', '${userID}', ${rsoID}, '${schoolID}')`;
+        
         conn.query(sql,function(err,results){
           if(err){
             message['error'] = 1;
@@ -369,7 +373,7 @@ if (!isDev && cluster.isMaster) {
           }else{
             message['events'] = results[0];
           }
-          console.log(results);
+          
           res.send(message); 
         });        
       },
