@@ -89,9 +89,7 @@ class EventCreation extends Component {
         postBody['location']= location;
         postBody['startDate']= ds;
         postBody['endDate']= de;
-        postBody['hostRSO']= this.state.hostRSO;
         postBody['private']= this.state.private;
-        postBody['repeat']= "";
 
         fetch("/api/events/create", {
           method: 'POST',
